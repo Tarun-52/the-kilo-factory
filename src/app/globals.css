@@ -1,0 +1,139 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 400 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/cormorantgaramond/v16/co3YmX5slCNuHLi8bLeY9MK7whWMhyjYrEtFmSq7Pw.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Cormorant Garamond';
+  font-style: normal;
+  font-weight: 600 700;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/cormorantgaramond/v16/co3YmX5slCNuHLi8bLeY9MK7whWMhyjYrEO7mSq7Pw.woff2') format('woff2');
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-serif: 'Cormorant Garamond', 'Georgia', serif;
+  --font-mono: var(--font-geist-mono);
+
+  --color-maroon: #6B1E1E;
+  --color-maroon-light: #8C2F2F;
+  --color-maroon-dark: #4A1515;
+  --color-gold: #C9A227;
+  --color-gold-dark: #A68520;
+  --color-saffron: #E08A1E;
+  --color-ivory: #FBF4E7;
+  --color-bark: #2B1B12;
+  --color-bark-light: #4A3828;
+  --color-veg-green: #3C8A3C;
+  --color-nonveg-red: #8C2F2F;
+
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: #FBF4E7;
+  --foreground: #2B1B12;
+  --card: #FFFCF7;
+  --card-foreground: #2B1B12;
+  --popover: #FFFCF7;
+  --popover-foreground: #2B1B12;
+  --primary: #6B1E1E;
+  --primary-foreground: #FBF4E7;
+  --secondary: #F0E6D0;
+  --secondary-foreground: #4A1515;
+  --muted: #F0E6D0;
+  --muted-foreground: #6B5A48;
+  --accent: #C9A227;
+  --accent-foreground: #2B1B12;
+  --destructive: #DC2626;
+  --border: #E0D5C3;
+  --input: #E0D5C3;
+  --ring: #C9A227;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-ivory text-bark;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+@layer utilities {
+  .font-royal {
+    font-family: 'Cormorant Garamond', 'Georgia', serif;
+  }
+  .text-gold-gradient {
+    background: linear-gradient(135deg, #C9A227 0%, #D4B84A 50%, #A68520 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  .bg-maroon-gradient {
+    background: linear-gradient(135deg, #6B1E1E 0%, #8C2F2F 50%, #4A1515 100%);
+  }
+  .bg-gold-gradient {
+    background: linear-gradient(135deg, #C9A227 0%, #D4B84A 50%, #A68520 100%);
+  }
+  .border-gold {
+    border-color: #C9A227;
+  }
+  .jaali-pattern {
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 0L60 30L30 60L0 30Z' fill='none' stroke='%23C9A227' stroke-width='0.5' opacity='0.15'/%3E%3Cpath d='M30 10L50 30L30 50L10 30Z' fill='none' stroke='%23C9A227' stroke-width='0.5' opacity='0.1'/%3E%3C/svg%3E");
+  }
+  .filigree-divider {
+    background-image: url("data:image/svg+xml,%3Csvg width='400' height='20' viewBox='0 0 400 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 10 Q10 0 20 10 Q30 20 40 10 Q50 0 60 10 Q70 20 80 10 Q90 0 100 10 Q110 20 120 10 Q130 0 140 10 Q150 20 160 10 Q170 0 180 10 Q190 20 200 10 Q210 0 220 10 Q230 20 240 10 Q250 0 260 10 Q270 20 280 10 Q290 0 300 10 Q310 20 320 10 Q330 0 340 10 Q350 20 360 10 Q370 0 380 10 Q390 20 400 10' fill='none' stroke='%23C9A227' stroke-width='1' opacity='0.4'/%3E%3C/svg%3E");
+    background-repeat: repeat-x;
+    background-size: 400px 20px;
+    height: 20px;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: #F0E6D0;
+    border-radius: 3px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #C9A227;
+    border-radius: 3px;
+  }
+}
