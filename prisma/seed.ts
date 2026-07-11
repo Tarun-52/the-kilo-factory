@@ -1,298 +1,221 @@
-// prisma/seed.ts
 import { PrismaClient } from "@prisma/client";
-
 const prisma = new PrismaClient();
 
 async function main() {
   console.log("🌱 Seeding database...");
 
-  // Clean existing data
   await prisma.orderItem.deleteMany();
   await prisma.order.deleteMany();
   await prisma.itemVariant.deleteMany();
   await prisma.item.deleteMany();
   await prisma.category.deleteMany();
 
-  // Create categories
-  const biryani = await prisma.category.create({
-    data: { name: "Biryani", icon: "🍚", description: "Aromatic rice dishes", displayOrder: 1 },
-  });
-  const karahi = await prisma.category.create({
-    data: { name: "Karahi", icon: "🍲", description: "Traditional karahi dishes", displayOrder: 2 },
-  });
-  const bbq = await prisma.category.create({
-    data: { name: "BBQ & Grill", icon: "🔥", description: "Grilled meats and kebabs", displayOrder: 3 },
-  });
-  const appetizers = await prisma.category.create({
-    data: { name: "Appetizers", icon: "🥟", description: "Starters and snacks", displayOrder: 4 },
-  });
-  const drinks = await prisma.category.create({
-    data: { name: "Drinks", icon: "🥤", description: "Beverages", displayOrder: 5 },
-  });
-  const desserts = await prisma.category.create({
-    data: { name: "Desserts", icon: "🍨", description: "Traditional sweets", displayOrder: 6 },
-  });
+  // 1. Create 23 Categories
+  const cats = await Promise.all([
+    prisma.category.create({ data: { name: "Veg Kebab Collection", icon: "🥬", description: "Royal vegetarian kebabs", displayOrder: 1 } }),
+    prisma.category.create({ data: { name: "Mutton Kebab Specials", icon: "🐑", description: "Premium mutton kebabs", displayOrder: 2 } }),
+    prisma.category.create({ data: { name: "Chicken Tikka & Kebabs", icon: "🍗", description: "Tandoori chicken specialties", displayOrder: 3 } }),
+    prisma.category.create({ data: { name: "Seafood Starters", icon: "🐟", description: "Fish and prawn appetizers", displayOrder: 4 } }),
+    prisma.category.create({ data: { name: "Shahi Daal-e-Darbar", icon: "🍲", description: "Traditional lentil dishes", displayOrder: 5 } }),
+    prisma.category.create({ data: { name: "Paneer Specialities", icon: "🧀", description: "Rich paneer curries", displayOrder: 6 } }),
+    prisma.category.create({ data: { name: "Veg Curries", icon: "🥘", description: "Garden fresh vegetables", displayOrder: 7 } }),
+    prisma.category.create({ data: { name: "Veg Kofta Curries", icon: "🧆", description: "Stuffed vegetable dumplings", displayOrder: 8 } }),
+    prisma.category.create({ data: { name: "Chicken Main Course", icon: "🍛", description: "Awadhi chicken curries", displayOrder: 9 } }),
+    prisma.category.create({ data: { name: "Egg Delicacies", icon: "🥚", description: "Classic egg preparations", displayOrder: 10 } }),
+    prisma.category.create({ data: { name: "Mutton Main Course", icon: "🐐", description: "Royal mutton curries", displayOrder: 11 } }),
+    prisma.category.create({ data: { name: "Fish & Prawns Curry", icon: "🦐", description: "Coastal seafood curries", displayOrder: 12 } }),
+    prisma.category.create({ data: { name: "Rice & Biryani", icon: "🍚", description: "Aromatic rice delicacies", displayOrder: 13 } }),
+    prisma.category.create({ data: { name: "Raitas", icon: "🥣", description: "Cool yogurt sides", displayOrder: 14 } }),
+    prisma.category.create({ data: { name: "Desserts", icon: "🍨", description: "Sweet endings", displayOrder: 15 } }),
+    prisma.category.create({ data: { name: "Awadhi Breads", icon: "🫓", description: "Tandoori breads", displayOrder: 16 } }),
+    prisma.category.create({ data: { name: "Chinese Veg Starters", icon: "🥡", description: "Indo-Chinese veg appetizers", displayOrder: 17 } }),
+    prisma.category.create({ data: { name: "Chinese Chicken Starters", icon: "🐉", description: "Indo-Chinese chicken appetizers", displayOrder: 18 } }),
+    prisma.category.create({ data: { name: "Chinese Seafood", icon: "🦞", description: "Indo-Chinese seafood", displayOrder: 19 } }),
+    prisma.category.create({ data: { name: "Veg Noodles", icon: "🍜", description: "Vegetarian noodles", displayOrder: 20 } }),
+    prisma.category.create({ data: { name: "Chicken Noodles", icon: "🍝", description: "Chicken noodles", displayOrder: 21 } }),
+    prisma.category.create({ data: { name: "Artisan Pasta", icon: "🫕", description: "Continental pasta", displayOrder: 22 } }),
+    prisma.category.create({ data: { name: "Signature Food Park", icon: "👑", description: "Chef's signature dishes", displayOrder: 23 } }),
+  ]);
 
-  // Helper function
-  async function createItem(data: {
-    categoryId: string;
-    name: string;
-    description: string;
-    photoUrl: string;
-    vegFlag?: boolean;
-    spiceLevel?: number;
-    isBestseller?: boolean;
-    isNew?: boolean;
-    isTodaysDeal?: boolean;
-    variants: { unit: string; price: number }[];
-  }) {
+  // Helper to add items fast
+  const add = async (c: number, n: string, u1: string, p1: number, u2: string | null, p2: number | null, v = false, b = false) => {
     const item = await prisma.item.create({
       data: {
-        categoryId: data.categoryId,
-        name: data.name,
-        description: data.description,
-        photoUrl: data.photoUrl,
-        vegFlag: data.vegFlag ?? false,
-        spiceLevel: data.spiceLevel ?? 2,
-        isBestseller: data.isBestseller ?? false,
-        isNew: data.isNew ?? false,
-        isTodaysDeal: data.isTodaysDeal ?? false,
+        categoryId: cats[c].id, name: n,
+        description: `Authentic ${n} crafted with traditional recipes and premium ingredients.`,
+        photoUrl: `/images/menu/${n.toLowerCase().replace(/ /g, '-').replace(/[^a-z0-9-]/g, '')}.jpg`,
+        vegFlag: v, spiceLevel: v ? 0 : 2, isBestseller: b,
       },
     });
+    const vars = [{ itemId: item.id, unit: u1, price: p1 }];
+    if (u2 && p2) vars.push({ itemId: item.id, unit: u2, price: p2 });
+    await prisma.itemVariant.createMany({ data: vars });
+  };
 
-    for (const v of data.variants) {
-      await prisma.itemVariant.create({
-        data: { itemId: item.id, unit: v.unit, price: v.price },
-      });
-    }
-    return item;
-  }
+  // 2. Add 5 Items Per Category (115 Total)
 
-  // --- EXISTING 15 ITEMS (Now with Images) ---
-  
-  await createItem({
-    categoryId: biryani.id, name: "Chicken Biryani", spiceLevel: 2, isBestseller: true,
-    description: "Aromatic basmati rice cooked with tender chicken pieces, saffron, and traditional spices.",
-    photoUrl: "/images/menu/chicken-biryani.jpg",
-    variants: [{ unit: "1kg", price: 450 }, { unit: "2kg", price: 800 }],
-  });
+  // 0: Veg Kebab Collection
+  await add(0, "Anar-e-Nawab Seekh", "1kg", 500, "500g", 300, true);
+  await add(0, "Shahi Afghani Malai Chaap", "1kg", 600, "500g", 350, true);
+  await add(0, "Nawabi Dahi Nazakat Kebab", "1kg", 700, "500g", 400, true);
+  await add(0, "Mirch-e-Khaas Paneer Tikka", "1kg", 600, "500g", 350, true);
+  await add(0, "Galawat-e-Awadh Kebab", "1kg", 500, "500g", 300, true, true);
 
-  await createItem({
-    categoryId: biryani.id, name: "Mutton Biryani", spiceLevel: 2, isBestseller: true,
-    description: "Premium mutton slow-cooked with fragrant basmati rice and secret blend of spices.",
-    photoUrl: "/images/menu/mutton-biryani.jpg",
-    variants: [{ unit: "1kg", price: 650 }, { unit: "2kg", price: 1200 }],
-  });
+  // 1: Mutton Kebab Specials
+  await add(1, "Nawabi Mutton Seekh", "1kg", 1399, "500g", 749, false, true);
+  await add(1, "Kakori-e-Awadh", "1kg", 1399, "500g", 749);
+  await add(1, "Peshawari Chapli Kebab", "1kg", 1399, "500g", 749);
+  await add(1, "Sikandari Mutton Burrah", "1kg", 1499, "500g", 749, false, true);
+  await add(1, "Galawat-e-Khaas", "1kg", 1399, "500g", 749);
 
-  await createItem({
-    categoryId: biryani.id, name: "Family Biryani Box", spiceLevel: 1, isTodaysDeal: true,
-    description: "A complete biryani feast for the whole family with raita and salad.",
-    photoUrl: "/images/menu/family-biryani.jpg",
-    variants: [{ unit: "3kg", price: 1600 }],
-  });
+  // 2: Chicken Tikka & Kebabs
+  await add(2, "Murgh Seekh-e-Sultan", "1kg", 999, "500g", 549, false, true);
+  await add(2, "Afghani Malai-e-Taj Tikka", "1kg", 799, "500g", 449);
+  await add(2, "Darbari Khada Masala Tikka", "1kg", 799, "500g", 449);
+  await add(2, "Tandoori Chicken", "1kg", 799, "500g", 449, false, true);
+  await add(2, "Tangdi Kebab", "1kg", 999, "500g", 549);
 
-  await createItem({
-    categoryId: karahi.id, name: "Chicken Karahi", spiceLevel: 3, isBestseller: true,
-    description: "Fresh chicken cooked in tomato-based gravy with green chilies and ginger.",
-    photoUrl: "/images/menu/chicken-karahi.jpg",
-    variants: [{ unit: "1kg", price: 850 }, { unit: "1.5kg", price: 1200 }],
-  });
+  // 3: Seafood Starters
+  await add(3, "Amritsari Machhli-e-Khaas", "1kg", 899, "500g", 499);
+  await add(3, "Ajwaini Fish Tikka", "1kg", 899, "500g", 499);
+  await add(3, "Dhungar-e-Machhli Tikka", "1kg", 2399, "500g", 1299, false, true);
+  await add(3, "Jhinga Angara-e-Shahi", "1kg", 2399, "500g", 1299);
+  await add(3, "Jhinga Koliwada Nawabi", "1kg", 2399, "500g", 1299);
 
-  await createItem({
-    categoryId: karahi.id, name: "Mutton Karahi", spiceLevel: 3,
-    description: "Tender mutton pieces cooked in authentic karahi style with aromatic spices.",
-    photoUrl: "/images/menu/mutton-karahi.jpg",
-    variants: [{ unit: "1kg", price: 1200 }, { unit: "1.5kg", price: 1700 }],
-  });
+  // 4: Shahi Daal-e-Darbar
+  await add(4, "Rajasthani Panchmel Dal", "1kg", 599, "500g", 349, true);
+  await add(4, "Signature Dal Makhani", "1kg", 599, "500g", 349, true, true);
+  await add(4, "Shahi Dal Maharani", "1kg", 599, "500g", 349, true);
+  await add(4, "Desi Ghee Dal Tadka", "1kg", 599, "500g", 349, true);
+  await add(4, "Amritsari Chole Masala", "1kg", 599, "500g", 349, true);
 
-  await createItem({
-    categoryId: bbq.id, name: "Seekh Kebab", spiceLevel: 2, isBestseller: true,
-    description: "Minced meat kebabs grilled to perfection with traditional spices.",
-    photoUrl: "/images/menu/seekh-kebab.jpg",
-    variants: [{ unit: "4 pcs", price: 350 }, { unit: "8 pcs", price: 650 }],
-  });
+  // 5: Paneer Specialities
+  await add(5, "Zafrani Paneer Makhani", "1kg", 899, "500g", 549, true, true);
+  await add(5, "Nawabi Butter Paneer", "1kg", 899, "500g", 549, true);
+  await add(5, "Paneer Do Pyaza-e-Darbar", "1kg", 899, "500g", 549, true);
+  await add(5, "Lazeez Paneer Khurchan", "1kg", 899, "500g", 549, true);
+  await add(5, "Angara Paneer Tikka Masala", "1kg", 899, "500g", 549, true);
 
-  await createItem({
-    categoryId: bbq.id, name: "Chicken Tikka", spiceLevel: 2, isBestseller: true,
-    description: "Boneless chicken marinated in yogurt and spices, grilled in tandoor.",
-    photoUrl: "/images/menu/chicken-tikka.jpg",
-    variants: [{ unit: "6 pcs", price: 400 }, { unit: "12 pcs", price: 750 }],
-  });
+  // 6: Veg Curries
+  await add(6, "Mix Veg Handi", "1kg", 599, "500g", 349, true);
+  await add(6, "Nizami Veg Handi", "1kg", 599, "500g", 349, true);
+  await add(6, "Tandoori Mushroom Boti Masala", "1kg", 899, "500g", 499, true, true);
+  await add(6, "Lahsuni Palak Saag", "1kg", 749, "500g", 499, true);
+  await add(6, "Royal Kaju Matar Malai", "1kg", 899, "500g", 549, true);
 
-  await createItem({
-    categoryId: bbq.id, name: "Malai Boti", spiceLevel: 1, isNew: true,
-    description: "Creamy and tender chicken pieces marinated in cream and mild spices.",
-    photoUrl: "/images/menu/malai-boti.jpg",
-    variants: [{ unit: "6 pcs", price: 450 }, { unit: "12 pcs", price: 850 }],
-  });
+  // 7: Veg Kofta Curries
+  await add(7, "Shahi Malai Kofta", "1kg", 749, "500g", 399, true, true);
+  await add(7, "Palak Anjeer Kofta-e-Khaas", "1kg", 749, "500g", 399, true);
+  await add(7, "Nawabi Veg Malai Kofta", "1kg", 749, "500g", 399, true);
+  await add(7, "Shahi Nargisi Kofta", "1kg", 749, "500g", 399, true);
+  await add(7, "Sham Savera Royale", "1kg", 749, "500g", 399, true);
 
-  await createItem({
-    categoryId: bbq.id, name: "Full Chicken BBQ Platter", spiceLevel: 2, isTodaysDeal: true,
-    description: "A mix of tikka, seekh kebab, and malai boti — perfect for sharing.",
-    photoUrl: "/images/menu/bbq-platter.jpg",
-    variants: [{ unit: "1 platter", price: 1500 }],
-  });
+  // 8: Chicken Main Course
+  await add(8, "Murgh Makhan-e-Khaas", "1kg", 999, "500g", 549, false, true);
+  await add(8, "Kadhai Murgh", "1kg", 999, "500g", 549);
+  await add(8, "Tandoori Chicken Tikka Masala", "1kg", 999, "500g", 549);
+  await add(8, "Murgh Changezi", "1kg", 999, "500g", 549);
+  await add(8, "Shahi Murgh Korma", "1kg", 999, "500g", 549);
 
-  await createItem({
-    categoryId: appetizers.id, name: "Samosa", spiceLevel: 2, vegFlag: true,
-    description: "Crispy pastry filled with spiced potatoes and peas.",
-    photoUrl: "/images/menu/samosa.jpg",
-    variants: [{ unit: "2 pcs", price: 100 }, { unit: "6 pcs", price: 250 }],
-  });
+  // 9: Egg Delicacies
+  await add(9, "Aaloo Ande Ka Salan", "1kg", 599, "500g", 399);
+  await add(9, "Anda Masala", "1kg", 599, "500g", 399);
+  await add(9, "Anda Curry", "1kg", 599, "500g", 399);
+  await add(9, "Anda Ghotala", "1kg", 599, "500g", 399, false, true);
+  await add(9, "Roast Egg Masala", "1kg", 599, "500g", 399);
 
-  await createItem({
-    categoryId: appetizers.id, name: "Chicken Spring Rolls", spiceLevel: 1, isNew: true,
-    description: "Crispy rolls stuffed with seasoned chicken and vegetables.",
-    photoUrl: "/images/menu/spring-rolls.jpg",
-    variants: [{ unit: "4 pcs", price: 200 }, { unit: "8 pcs", price: 380 }],
-  });
+  // 10: Mutton Main Course
+  await add(10, "Awadhi Nalli Nihari", "1kg", 1599, "500g", 849, false, true);
+  await add(10, "Dum Bandh Gosht", "1kg", 1599, "500g", 849);
+  await add(10, "Kashmiri Rogan Josh", "1kg", 1599, "500g", 849, false, true);
+  await add(10, "Kadhai Gosht", "1kg", 1599, "500g", 849);
+  await add(10, "Rajwadi Laal Maas", "1kg", 1599, "500g", 849);
 
-  await createItem({
-    categoryId: appetizers.id, name: "Garlic Naan", spiceLevel: 0, vegFlag: true,
-    description: "Soft naan bread topped with garlic and butter.",
-    photoUrl: "/images/menu/garlic-naan.jpg",
-    variants: [{ unit: "1 pc", price: 60 }, { unit: "4 pcs", price: 200 }],
-  });
+  // 11: Fish & Prawns Curry
+  await add(11, "Nawabi Awadhi Fish Curry", "1kg", 999, "500g", 549, false, true);
+  await add(11, "Raw Mango Fish Curry", "1kg", 999, "500g", 549);
+  await add(11, "Authentic Goan Fish Curry", "1kg", 999, "500g", 549);
+  await add(11, "Tawa Pomfret Masala", "1kg", 1699, "500g", 899, false, true);
+  await add(11, "Kolkata Macher Jhol", "1kg", 1299, "500g", 699);
 
-  await createItem({
-    categoryId: drinks.id, name: "Coca Cola", spiceLevel: 0, vegFlag: true,
-    description: "Classic cold drink.", photoUrl: "/images/menu/cola.jpg",
-    variants: [{ unit: "500ml", price: 80 }, { unit: "1.5L", price: 150 }],
-  });
+  // 12: Rice & Biryani
+  await add(12, "Shahi Subz Pulao", "1kg", 699, "500g", 399, true);
+  await add(12, "Subz Chaman Dum Biryani", "1kg", 749, "500g", 399, true);
+  await add(12, "Nawabi Murgh Dum Biryani", "1kg", 1049, "500g", 599, false, true);
+  await add(12, "Arabian Mutton Mandi", "1kg", 1799, "500g", 999, false, true);
+  await add(12, "Nawabi Gosht Dum Biryani", "1kg", 1699, "500g", 899);
 
-  await createItem({
-    categoryId: drinks.id, name: "Fresh Lime Soda", spiceLevel: 0, vegFlag: true,
-    description: "Refreshing lime soda with mint.", photoUrl: "/images/menu/lime-soda.jpg",
-    variants: [{ unit: "1 glass", price: 120 }],
-  });
+  // 13: Raitas
+  await add(13, "Burani Raita-e-Khaas", "500ml", 249, "250ml", 149, true);
+  await add(13, "Kheera Pudina Raita", "500ml", 249, "250ml", 149, true);
+  await add(13, "Fresh Pudina Raita", "500ml", 249, "250ml", 149, true);
+  await add(13, "Garden Fresh Veg Raita", "500ml", 300, "250ml", 179, true);
+  await add(13, "Pineapple Raita", "500ml", 549, "250ml", 349, true);
 
-  await createItem({
-    categoryId: drinks.id, name: "Lassi", spiceLevel: 0, vegFlag: true, isNew: true,
-    description: "Traditional creamy yogurt drink.", photoUrl: "/images/menu/lassi.jpg",
-    variants: [{ unit: "1 glass", price: 150 }],
-  });
+  // 14: Desserts
+  await add(14, "Zauq-e-Shahi", "1kg", 899, "500g", 499, true, true);
+  await add(14, "Mawa Kheer-e-Khaas", "1kg", 1200, "500g", 649, true, true);
+  await add(14, "Zafrani Rice Phirni", "1kg", 899, "500g", 499, true);
+  await add(14, "Classic Cream Kunafa", "1 pc", 449, "2 pcs", 899, true);
+  await add(14, "Belgian Chocolate Kunafa", "1 pc", 449, "2 pcs", 899, true);
 
+  // 15: Awadhi Breads
+  await add(15, "Tandoori Roti", "1 pc", 25, "4 pcs", 100, true);
+  await add(15, "Butter Tandoori Roti", "1 pc", 35, "4 pcs", 140, true);
+  await add(15, "Lachha Paratha", "1 pc", 70, "4 pcs", 280, true, true);
+  await add(15, "Garlic Naan", "1 pc", 70, "4 pcs", 280, true, true);
+  await add(15, "Cheese Garlic Naan", "1 pc", 80, "4 pcs", 320, true);
 
-  // --- 15 NEW ITEMS ---
+  // 16: Chinese Veg Starters
+  await add(16, "Honey Chilli Potato", "1kg", 849, "500g", 449, true, true);
+  await add(16, "Veg Spring Rolls", "1kg", 849, "500g", 449, true);
+  await add(16, "Crispy Corn Pepper Salt", "1kg", 849, "500g", 449, true);
+  await add(16, "Kung Pao Paneer", "1kg", 849, "500g", 449, true);
+  await add(16, "Mushroom Pepper Salt", "1kg", 849, "500g", 449, true);
 
-  await createItem({
-    categoryId: biryani.id, name: "Beef Biryani", spiceLevel: 3, isNew: true,
-    description: "Slow-cooked beef chunks layered with fragrant basmati rice and aromatic spices.",
-    photoUrl: "/images/menu/beef-biryani.jpg",
-    variants: [{ unit: "1kg", price: 550 }, { unit: "2kg", price: 1000 }],
-  });
+  // 17: Chinese Chicken Starters
+  await add(17, "Chicken Lollipop", "1kg", 899, "500g", 499, false, true);
+  await add(17, "Crispy Fried Chicken", "1kg", 899, "500g", 499);
+  await add(17, "Dragon Chicken", "1kg", 899, "500g", 499);
+  await add(17, "Chicken Schezwan", "1kg", 899, "500g", 499);
+  await add(17, "Crispy Honey Chicken", "1kg", 899, "500g", 499);
 
-  await createItem({
-    categoryId: biryani.id, name: "Prawn Biryani", spiceLevel: 2,
-    description: "Juicy prawns cooked with lightly spiced basmati rice and fresh herbs.",
-    photoUrl: "/images/menu/prawn-biryani.jpg",
-    variants: [{ unit: "1kg", price: 900 }],
-  });
+  // 18: Chinese Seafood
+  await add(18, "Chilli Fish", "1kg", 1199, "500g", 699, false, true);
+  await add(18, "Fish Fingers", "1kg", 1199, "500g", 699);
+  await add(18, "Dragon Fish", "1kg", 1199, "500g", 699);
+  await add(18, "Golden Fried Prawns", "1kg", 2399, "500g", 1499, false, true);
+  await add(18, "Salt & Pepper Prawns", "1kg", 2399, "500g", 1499);
 
-  await createItem({
-    categoryId: karahi.id, name: "Fish Karahi", spiceLevel: 2, isNew: true,
-    description: "Fresh fish pieces cooked in rich tomato and yogurt gravy with traditional spices.",
-    photoUrl: "/images/menu/fish-karahi.jpg",
-    variants: [{ unit: "1kg", price: 1100 }, { unit: "1.5kg", price: 1500 }],
-  });
+  // 19: Veg Noodles
+  await add(19, "Veg Hakka Noodles", "1kg", 699, "500g", 399, true, true);
+  await add(19, "Veg Schezwan Noodles", "1kg", 699, "500g", 399, true);
+  await add(19, "Veg Chilli Garlic Noodles", "1kg", 699, "500g", 399, true);
+  await add(19, "Veg Burnt Garlic Noodles", "1kg", 699, "500g", 399, true);
+  await add(19, "Veg Singapore Noodles", "1kg", 699, "500g", 399, true);
 
-  await createItem({
-    categoryId: karahi.id, name: "Prawns Karahi", spiceLevel: 2,
-    description: "Jumbo prawns tossed in a spicy, tangy karahi sauce with green chilies.",
-    photoUrl: "/images/menu/prawns-karahi.jpg",
-    variants: [{ unit: "500g", price: 1200 }],
-  });
+  // 20: Chicken Noodles
+  await add(20, "Chicken Hakka Noodles", "1kg", 799, "500g", 449, false, true);
+  await add(20, "Chicken Schezwan Noodles", "1kg", 799, "500g", 449);
+  await add(20, "Chicken Chilli Garlic Noodles", "1kg", 799, "500g", 449);
+  await add(20, "Chicken Burnt Garlic Noodles", "1kg", 799, "500g", 449);
+  await add(20, "Chicken Singapore Noodles", "1kg", 799, "500g", 449);
 
-  await createItem({
-    categoryId: bbq.id, name: "Reshmi Kebab", spiceLevel: 1, isBestseller: true,
-    description: "Silky smooth minced chicken kebabs wrapped around skewers and grilled.",
-    photoUrl: "/images/menu/reshmi-kebab.jpg",
-    variants: [{ unit: "4 pcs", price: 400 }, { unit: "8 pcs", price: 750 }],
-  });
+  // 21: Artisan Pasta
+  await add(21, "Arrabbiata Pasta", "1kg", 899, "500g", 499, true, true);
+  await add(21, "Creamy Alfredo Pasta", "1kg", 899, "500g", 499, true);
+  await add(21, "Pink Sauce Pasta", "1kg", 899, "500g", 499, true);
+  await add(21, "Pesto Basil Pasta", "1kg", 899, "500g", 499, true);
+  await add(21, "Four Cheese Pasta", "1kg", 899, "500g", 499, true);
 
-  await createItem({
-    categoryId: bbq.id, name: "Chapli Kebab", spiceLevel: 3,
-    description: "Spicy minced meat patties with pomegranate seeds, pan-fried to perfection.",
-    photoUrl: "/images/menu/chapli-kebab.jpg",
-    variants: [{ unit: "2 pcs", price: 300 }, { unit: "4 pcs", price: 550 }],
-  });
+  // 22: Signature Food Park
+  await add(22, "Shahi Sikandari Raan", "Full Portion", 2499, null, null, false, true);
+  await add(22, "Dum Raan Khade Masalon Ki", "Full Portion", 2499, null, null, false, true);
+  await add(22, "Nawabi Tandoori Murgh", "Full Portion", 999, null, null, false);
+  await add(22, "Dum Haleem-e-Shahi", "1kg", 1899, "500g", 999, false, true);
+  await add(22, "Lucknowi Bheja Masala", "1kg", 2299, "500g", 1299, false);
 
-  await createItem({
-    categoryId: bbq.id, name: "Fish Tikka", spiceLevel: 2, isNew: true,
-    description: "Marinated fish fillets grilled in the tandoor until flaky and smoky.",
-    photoUrl: "/images/menu/fish-tikka.jpg",
-    variants: [{ unit: "6 pcs", price: 600 }],
-  });
-
-  await createItem({
-    categoryId: bbq.id, name: "Beef Boti", spiceLevel: 3,
-    description: "Cubed beef marinated in robust spices and grilled over charcoal.",
-    photoUrl: "/images/menu/beef-boti.jpg",
-    variants: [{ unit: "6 pcs", price: 500 }, { unit: "12 pcs", price: 900 }],
-  });
-
-  await createItem({
-    categoryId: appetizers.id, name: "Chicken Pakora", spiceLevel: 2,
-    description: "Crispy deep-fried chicken fritters coated in spiced gram flour batter.",
-    photoUrl: "/images/menu/chicken-pakora.jpg",
-    variants: [{ unit: "4 pcs", price: 150 }, { unit: "8 pcs", price: 280 }],
-  });
-
-  await createItem({
-    categoryId: appetizers.id, name: "Dahi Bhalla", spiceLevel: 0, vegFlag: true,
-    description: "Soft lentil dumplings drowned in creamy yogurt topped with sweet and spicy chutneys.",
-    photoUrl: "/images/menu/dahi-bhalla.jpg",
-    variants: [{ unit: "2 pcs", price: 150 }, { unit: "4 pcs", price: 280 }],
-  });
-
-  await createItem({
-    categoryId: appetizers.id, name: "Paneer Tikka", spiceLevel: 2, vegFlag: true, isNew: true,
-    description: "Cubes of Indian cottage cheese marinated in spices and grilled in a tandoor.",
-    photoUrl: "/images/menu/paneer-tikka.jpg",
-    variants: [{ unit: "6 pcs", price: 350 }, { unit: "12 pcs", price: 650 }],
-  });
-
-  await createItem({
-    categoryId: drinks.id, name: "Mango Lassi", spiceLevel: 0, vegFlag: true, isBestseller: true,
-    description: "Sweet and refreshing yogurt drink blended with fresh mango pulp.",
-    photoUrl: "/images/menu/mango-lassi.jpg",
-    variants: [{ unit: "1 glass", price: 180 }],
-  });
-
-  await createItem({
-    categoryId: drinks.id, name: "Mint Margarita", spiceLevel: 0, vegFlag: true, isNew: true,
-    description: "A refreshing blend of fresh mint, lime, soda, and a hint of sugar.",
-    photoUrl: "/images/menu/mint-margarita.jpg",
-    variants: [{ unit: "1 glass", price: 150 }],
-  });
-
-  await createItem({
-    categoryId: desserts.id, name: "Gulab Jamun", spiceLevel: 0, vegFlag: true, isBestseller: true,
-    description: "Deep-fried milk dumplings soaked in rose-flavored sugar syrup.",
-    photoUrl: "/images/menu/gulab-jamun.jpg",
-    variants: [{ unit: "2 pcs", price: 100 }, { unit: "6 pcs", price: 250 }],
-  });
-
-  await createItem({
-    categoryId: desserts.id, name: "Kheer", spiceLevel: 0, vegFlag: true, isNew: true,
-    description: "Traditional rice pudding slow-cooked with milk, sugar, cardamom, and topped with nuts.",
-    photoUrl: "/images/menu/kheer.jpg",
-    variants: [{ unit: "1 bowl", price: 200 }],
-  });
-
-  // Count results
-  const categoryCount = await prisma.category.count();
-  const itemCount = await prisma.item.count();
-  const variantCount = await prisma.itemVariant.count();
-
-  console.log(`✅ Seeded ${categoryCount} categories, ${itemCount} items, ${variantCount} variants`);
+  console.log(`✅ Seeded ${cats.length} categories and 115 items`);
 }
 
-main()
-  .catch((e) => {
-    console.error("❌ Seed failed:", e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main().catch((e) => { console.error("❌ Seed failed:", e); process.exit(1); }).finally(() => prisma.$disconnect());
