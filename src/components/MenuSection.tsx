@@ -64,9 +64,20 @@ function ItemCard({ item, index }: { item: any; index: number }) {
       </div>
 
       {/* Image placeholder */}
+            {/* Image */}
       <div className={`h-32 bg-gradient-to-br ${grad} flex items-center justify-center relative overflow-hidden`}>
-        <span className="text-5xl opacity-40">{item.category?.icon || '🍽️'}</span>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+        {item.photoUrl && (
+          <img 
+            src={item.photoUrl} 
+            alt={item.name}
+            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            onError={(e) => {
+              (e.target as HTMLImageElement).style.display = 'none';
+            }}
+          />
+        )}
+        <span className={`text-5xl opacity-40 ${item.photoUrl ? 'hidden' : ''}`}>{item.category?.icon || '🍽️'}</span>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
       </div>
 
       {/* Info */}
