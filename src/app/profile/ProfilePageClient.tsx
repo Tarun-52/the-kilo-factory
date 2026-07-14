@@ -191,6 +191,10 @@ export default function ProfilePageClient() {
   const [notifyOffers, setNotifyOffers] = useState(true);
   const [foodPref, setFoodPref] = useState<"all" | "veg" | "nonveg">("all");
 
+  // --- NEW: Set Password States ---
+  const [passwordMsg, setPasswordMsg] = useState('');
+  const [passwordLoading, setPasswordLoading] = useState(false);
+
   // Prevent hydration mismatch — session-dependent UI only renders after mount
   useEffect(() => { setMounted(true); }, []);
 
@@ -325,7 +329,6 @@ export default function ProfilePageClient() {
     setAddrSaving(true);
     try {
       if (addrEditId) {
-        // Update existing
         const res = await fetch("/api/user/addresses", {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -336,7 +339,6 @@ export default function ProfilePageClient() {
         setAddresses((prev) => prev.map((a) => (a.id === addrEditId ? json.address : a)));
         toast.success("Address updated!");
       } else {
-        // Create new
         const res = await fetch("/api/user/addresses", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -413,9 +415,46 @@ export default function ProfilePageClient() {
     signOut({ callbackUrl: "/" });
   };
 
+  // --- NEW: Set Password Handler ---
+  const handleSetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const pw = formData.get('newPassword') as string;
+
+    if (!pw || pw.length < 6) {
+      setPasswordMsg('Password must be at least 6 characters.');
+      return;
+    }
+
+    setPasswordLoading(true);
+    setPasswordMsg('');
+
+    try {
+      const res = await fetch('/api/user/set-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ newPassword: pw }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        setPasswordMsg('Password saved successfully! You can now log in with email/password.');
+        (e.target as HTMLFormElement).reset();
+        toast.success("Password set successfully!");
+      } else {
+        setPasswordMsg(data.error || 'Failed to save password.');
+        toast.error(data.error || "Failed to save password");
+      }
+    } catch {
+      setPasswordMsg('An error occurred.');
+      toast.error("An error occurred");
+    } finally {
+      setPasswordLoading(false);
+    }
+  };
+
   // ── Loading / Pre-mount guard ───────────────────────────────────
-  // During SSR and hydration, always show a safe loading state.
-  // This prevents hydration mismatches when session resolves immediately on client.
   if (!mounted || status === "loading" || loading) {
     return (
       <div className="min-h-screen bg-ivory flex items-center justify-center">
@@ -501,7 +540,7 @@ export default function ProfilePageClient() {
               <div className="min-w-0 flex-1">
                 <h2 className="text-xl font-bold text-bark truncate">{displayName}</h2>
                 <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
-                  <Mail className="size-3.5 flex-shrink-0" />
+                  <Mail className="size-3.5 shrink-0" />
                   <span className="truncate">{displayEmail}</span>
                 </div>
                 {displayMobile ? (
@@ -521,7 +560,7 @@ export default function ProfilePageClient() {
                 variant="outline"
                 size="sm"
                 onClick={() => { setEditName(displayName); setEditMobile(displayMobile ?? ""); setEditOpen(true); }}
-                className="gap-1.5 text-xs border-maroon/30 text-maroon hover:bg-maroon/5 flex-shrink-0 ml-3"
+                className="gap-1.5 text-xs border-maroon/30 text-maroon hover:bg-maroon/5 shrink-0 ml-3"
               >
                 <Edit3 className="size-3.5" /> Edit
               </Button>
@@ -551,7 +590,7 @@ export default function ProfilePageClient() {
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition cursor-pointer flex-shrink-0 ${
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium whitespace-nowrap transition cursor-pointer shrink-0 ${
                 activeTab === tab.key
                   ? "bg-maroon text-ivory shadow-sm"
                   : "bg-white border border-border text-muted-foreground hover:border-maroon/30 hover:text-bark"
@@ -611,11 +650,46 @@ export default function ProfilePageClient() {
                   <ActionRow icon={<CreditCard className="size-4 text-gold-dark" />} label="Payment Methods" onClick={() => toast.info("Payment methods coming soon!")} />
                   {session.user.isAdmin && (
                     <>
-                      <Separator className="!my-2 bg-gold/10" />
+                      <Separator className="my-2! bg-gold/10" />
                       <ActionRow icon={<ShieldAlert className="size-4 text-purple-600" />} label="Admin Panel" onClick={() => router.push("/admin")} />
                     </>
                   )}
                 </div>
+              </CardContent>
+            </Card>
+
+            {/* ── NEW: Set Password Section ─────────────────────────────── */}
+            <Card className="border-gold/10 shadow-sm">
+              <CardHeader className="pb-3">
+                <CardTitle className="font-royal text-base text-bark">Set Account Password</CardTitle>
+              </CardHeader>
+              <CardContent className="pt-0">
+                <p className="text-sm text-muted-foreground mb-4">
+                  You currently log in with Google. Set a password to enable Email/Password login.
+                </p>
+                <form onSubmit={handleSetPassword} className="flex flex-col sm:flex-row gap-3 items-start">
+                  <Input
+                    type="password"
+                    name="newPassword"
+                    placeholder="Enter new password (min 6 characters)"
+                    className="flex-1"
+                    required
+                    minLength={6}
+                  />
+                  <Button
+                    type="submit"
+                    disabled={passwordLoading}
+                    className="bg-maroon hover:bg-maroon-light text-ivory shrink-0"
+                  >
+                    {passwordLoading ? <Loader2 className="size-4 animate-spin mr-1.5" /> : null}
+                    {passwordLoading ? 'Saving...' : 'Save Password'}
+                  </Button>
+                </form>
+                {passwordMsg && (
+                  <p className={`mt-3 text-sm ${passwordMsg.includes('successfully') ? 'text-green-600' : 'text-red-500'}`}>
+                    {passwordMsg}
+                  </p>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -623,13 +697,12 @@ export default function ProfilePageClient() {
 
         {activeTab === "orders" && (
           <div className="space-y-4">
-            {/* Filter pills */}
             <div className="flex gap-2 overflow-x-auto pb-1">
               {ORDER_FILTERS.map((f) => (
                 <button
                   key={f.key}
                   onClick={() => setOrderFilter(f.key)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition cursor-pointer flex-shrink-0 ${
+                  className={`px-4 py-2 rounded-full text-sm font-medium whitespace-nowrap transition cursor-pointer shrink-0 ${
                     orderFilter === f.key
                       ? "bg-maroon text-ivory"
                       : "bg-white border border-border text-muted-foreground hover:border-maroon/30"
@@ -659,7 +732,6 @@ export default function ProfilePageClient() {
               <div className="space-y-3">
                 {filteredOrders.map((order) => (
                   <Card key={order.id} className="border-gold/10 shadow-sm overflow-hidden">
-                    {/* Order header - always visible */}
                     <button
                       onClick={() => setExpandedOrder(expandedOrder === order.id ? null : order.id)}
                       className="w-full text-left p-4 hover:bg-muted/30 transition cursor-pointer"
@@ -679,7 +751,7 @@ export default function ProfilePageClient() {
                             {new Date(order.createdAt).toLocaleString("en-IN", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                           </p>
                         </div>
-                        <div className="flex items-center gap-3 flex-shrink-0 ml-3">
+                        <div className="flex items-center gap-3 shrink-0 ml-3">
                           <p className="text-base font-bold text-bark">{"\u20B9"}{order.total.toLocaleString("en-IN")}</p>
                           {expandedOrder === order.id ? (
                             <ChevronDown className="size-4 text-muted-foreground" />
@@ -690,10 +762,8 @@ export default function ProfilePageClient() {
                       </div>
                     </button>
 
-                    {/* Expanded order details */}
                     {expandedOrder === order.id && (
                       <div className="border-t border-border bg-muted/20 p-4 space-y-4">
-                        {/* Items */}
                         <div>
                           <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-2">Items Ordered</p>
                           <div className="space-y-2">
@@ -701,7 +771,7 @@ export default function ProfilePageClient() {
                               <div key={idx} className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                   <span className={`inline-block size-3 rounded-sm border ${item.itemVariant.item.vegFlag ? "border-veg-green" : "border-nonveg-red"}`}>
-                                    <span className={`block size-1.5 m-[2px] rounded-full ${item.itemVariant.item.vegFlag ? "bg-veg-green" : "bg-nonveg-red"}`} />
+                                    <span className={`block size-1.5 m-0.5 rounded-full ${item.itemVariant.item.vegFlag ? "bg-veg-green" : "bg-nonveg-red"}`} />
                                   </span>
                                   <span className="text-sm text-bark">{item.itemVariant.item.name}</span>
                                   <span className="text-xs text-muted-foreground">({item.itemVariant.unit})</span>
@@ -714,7 +784,6 @@ export default function ProfilePageClient() {
                           </div>
                         </div>
 
-                        {/* Bill breakdown */}
                         <div className="bg-white rounded-lg p-3 space-y-1.5 text-sm">
                           <div className="flex justify-between"><span className="text-muted-foreground">Subtotal</span><span>{"\u20B9"}{order.subtotal.toLocaleString("en-IN")}</span></div>
                           {order.gst > 0 && <div className="flex justify-between"><span className="text-muted-foreground">GST</span><span>{"\u20B9"}{order.gst.toLocaleString("en-IN")}</span></div>}
@@ -725,12 +794,11 @@ export default function ProfilePageClient() {
                           <div className="flex justify-between font-bold text-base"><span>Total</span><span>{"\u20B9"}{order.total.toLocaleString("en-IN")}</span></div>
                         </div>
 
-                        {/* Delivery address */}
                         {order.address && (
                           <div>
                             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1">Delivery Address</p>
                             <div className="flex items-start gap-2 text-sm text-bark">
-                              <MapPin className="size-4 text-saffron mt-0.5 flex-shrink-0" />
+                              <MapPin className="size-4 text-saffron mt-0.5 shrink-0" />
                               <div>
                                 <p className="font-medium">{order.address.label}</p>
                                 <p className="text-muted-foreground">{order.address.line1}{order.address.line2 ? `, ${order.address.line2}` : ""}</p>
@@ -740,7 +808,6 @@ export default function ProfilePageClient() {
                           </div>
                         )}
 
-                        {/* Payment & instructions */}
                         <div className="flex flex-wrap gap-3 text-xs">
                           <div className="flex items-center gap-1 text-muted-foreground">
                             <CreditCard className="size-3.5" />
@@ -788,7 +855,7 @@ export default function ProfilePageClient() {
                   <Card key={addr.id} className="border-gold/10 shadow-sm">
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
-                        <div className="mt-0.5 size-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
+                        <div className="mt-0.5 size-8 rounded-full bg-muted flex items-center justify-center shrink-0">
                           {addr.label?.toLowerCase() === "office" || addr.label?.toLowerCase() === "work" ? (
                             <Building className="size-4 text-muted-foreground" />
                           ) : (
@@ -879,7 +946,6 @@ export default function ProfilePageClient() {
 
         {activeTab === "settings" && (
           <div className="space-y-4">
-            {/* Food Preferences */}
             <Card className="border-gold/10 shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="font-royal text-base text-bark">Food Preferences</CardTitle>
@@ -909,7 +975,6 @@ export default function ProfilePageClient() {
               </CardContent>
             </Card>
 
-            {/* Notifications */}
             <Card className="border-gold/10 shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="font-royal text-base text-bark flex items-center gap-2">
@@ -935,7 +1000,6 @@ export default function ProfilePageClient() {
               </CardContent>
             </Card>
 
-            {/* Help */}
             <Card className="border-gold/10 shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="font-royal text-base text-bark flex items-center gap-2">
@@ -945,13 +1009,12 @@ export default function ProfilePageClient() {
               <CardContent className="pt-0">
                 <div className="space-y-1">
                   <ActionRow icon={<Phone className="size-4 text-maroon" />} label="Contact Support" onClick={() => toast.info("Support: +91 98765 43210")} />
-                  <ActionRow icon={<Mail className="size-4 text-saffron" />} label="Email Us" onClick={() => toast.info("Email: support@dawatexpress.com")} />
+                  <ActionRow icon={<Mail className="size-4 text-saffron" />} label="Email Us" onClick={() => toast.info("Email: support@thekilofactory.com")} />
                   <ActionRow icon={<HelpCircle className="size-4 text-gold-dark" />} label="FAQs" onClick={() => toast.info("FAQs coming soon!")} />
                 </div>
               </CardContent>
             </Card>
 
-            {/* Danger Zone */}
             <Card className="border-red-200 shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="font-royal text-base text-red-600 flex items-center gap-2">
@@ -1093,7 +1156,7 @@ export default function ProfilePageClient() {
                 <Input
                   value={addrForm.pincode}
                   onChange={(e) => setAddrForm((f) => ({ ...f, pincode: e.target.value.replace(/\D/g, "").slice(0, 6) }))}
-                  placeholder="226001"
+                  placeholder="6-digit pincode"
                 />
               </div>
             </div>
@@ -1105,30 +1168,30 @@ export default function ProfilePageClient() {
               disabled={addrSaving || !addrForm.line1.trim() || !addrForm.pincode.trim()}
               className="flex-1 bg-maroon hover:bg-maroon-light text-ivory"
             >
-              {addrSaving ? <Loader2 className="size-4 animate-spin mr-1.5" /> : <Plus className="size-4 mr-1.5" />}
-              {addrEditId ? "Update" : "Add"} Address
+              {addrSaving ? <Loader2 className="size-4 animate-spin mr-1.5" /> : <Check className="size-4 mr-1.5" />}
+              {addrEditId ? "Update" : "Add Address"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* ── Delete Address Confirm Dialog ───────────────────────── */}
-      <Dialog open={!!addrDeleteId} onOpenChange={() => setAddrDeleteId(null)}>
+      {/* ── Delete Address Confirmation Dialog ──────────────── */}
+      <Dialog open={!!addrDeleteId} onOpenChange={(open) => !open && setAddrDeleteId(null)}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
             <DialogTitle className="font-royal text-lg text-bark">Delete Address</DialogTitle>
-            <DialogDescription>Are you sure you want to remove this address? This action cannot be undone.</DialogDescription>
+            <DialogDescription>Are you sure you want to delete this address? This action cannot be undone.</DialogDescription>
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setAddrDeleteId(null)} className="flex-1">Cancel</Button>
-            <Button variant="destructive" onClick={confirmDeleteAddress} className="flex-1">
+            <Button onClick={confirmDeleteAddress} variant="destructive" className="flex-1">
               <Trash2 className="size-4 mr-1.5" /> Delete
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* ── Logout Dialog ──────────────────────────────────────── */}
+      {/* ── Logout Dialog ───────────────────────────────────── */}
       <Dialog open={logoutDialogOpen} onOpenChange={setLogoutDialogOpen}>
         <DialogContent className="sm:max-w-sm">
           <DialogHeader>
@@ -1137,7 +1200,7 @@ export default function ProfilePageClient() {
           </DialogHeader>
           <DialogFooter className="gap-2 sm:gap-0">
             <Button variant="outline" onClick={() => setLogoutDialogOpen(false)} className="flex-1">Cancel</Button>
-            <Button variant="destructive" onClick={handleLogout} className="flex-1">
+            <Button onClick={handleLogout} variant="destructive" className="flex-1">
               <LogOut className="size-4 mr-1.5" /> Sign Out
             </Button>
           </DialogFooter>
@@ -1148,33 +1211,51 @@ export default function ProfilePageClient() {
 }
 
 // ---------------------------------------------------------------------------
-// Sub-components
+// Helper Sub-Components
 // ---------------------------------------------------------------------------
 
 function InfoRow({ label, value, icon, valueClass = "" }: { label: string; value: string; icon: React.ReactNode; valueClass?: string }) {
   return (
-    <div className="flex items-center gap-3 py-2">
-      <div className="flex-shrink-0">{icon}</div>
-      <div className="flex-1 min-w-0">
-        <p className="text-xs text-muted-foreground">{label}</p>
-        <p className={`text-sm text-bark ${valueClass}`}>{value}</p>
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3 min-w-0">
+        <div className="size-8 rounded-full bg-muted/80 flex items-center justify-center shrink-0">
+          {icon}
+        </div>
+        <span className="text-sm text-muted-foreground whitespace-nowrap">{label}</span>
       </div>
+      <span className={`text-sm text-right font-medium text-bark truncate ${valueClass}`}>{value}</span>
     </div>
   );
 }
 
-function ActionRow({ icon, label, badge, onClick }: { icon: React.ReactNode; label: string; badge?: string; onClick: () => void }) {
+function ActionRow({
+  icon,
+  label,
+  badge,
+  onClick,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  badge?: string;
+  onClick: () => void;
+}) {
   return (
     <button
       onClick={onClick}
-      className="flex items-center justify-between w-full px-3 py-2.5 rounded-lg text-bark hover:bg-muted/50 transition cursor-pointer"
+      className="flex items-center justify-between w-full px-3 py-2.5 rounded-lg hover:bg-muted/50 transition cursor-pointer"
     >
       <div className="flex items-center gap-3">
         {icon}
-        <span className="text-sm font-medium">{label}</span>
-        {badge && <span className="text-[10px] font-medium text-maroon bg-maroon/10 px-1.5 py-0.5 rounded-full">{badge}</span>}
+        <span className="text-sm font-medium text-bark">{label}</span>
       </div>
-      <ChevronRight className="size-4 text-muted-foreground" />
+      <div className="flex items-center gap-2">
+        {badge && (
+          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 bg-maroon/10 text-maroon border-maroon/20">
+            {badge}
+          </Badge>
+        )}
+        <ChevronRight className="size-4 text-muted-foreground" />
+      </div>
     </button>
   );
 }

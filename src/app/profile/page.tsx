@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import ProfilePageClient from "./ProfilePageClient";
 
 // Profile page depends on session — never cache
 export const dynamic = "force-dynamic";
@@ -11,5 +12,3 @@ export const metadata: Metadata = {
 export default function ProfilePage() {
   return <ProfilePageClient />;
 }
-
-import ProfilePageClient from "./ProfilePageClient";
