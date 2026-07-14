@@ -62,19 +62,15 @@ export default function Header() {
       {/* ── Top row ─────────────────────────────────────────────────── */}
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         {/* Logo */}
-        <button
+                <button
           onClick={() => handleNav("/")}
-          className="flex items-center gap-2 focus:outline-none cursor-pointer"
+          className="flex items-center focus:outline-none cursor-pointer"
         >
-          <UtensilsCrossed className="size-6 text-gold" />
-          <div className="flex flex-col leading-tight">
-            <span className="font-royal text-2xl font-bold text-gold-gradient">
-              The Kilo Factory
-            </span>
-            <span className="hidden text-[10px] tracking-widest text-ivory/70 sm:block">
-              ROYAL AWADHI CUISINE
-            </span>
-          </div>
+          <img 
+            src="/logo.png" 
+            alt="The Kilo Factory Logo" 
+            className="h-12 w-auto object-contain"
+          />
         </button>
 
         {/* ── Desktop center: Search ───────────────────────────────── */}

@@ -13,12 +13,15 @@ export default function HeroSection() {
   return (
     <section className="relative w-full">
       {/* ── Main Hero ──────────────────────────────────────────── */}
-      <div className="relative bg-maroon-gradient jaali-pattern overflow-hidden">
-        {/* Dark overlay for depth */}
-        <div className="absolute inset-0 bg-black/20" />
+      
+      {/* 🛑 CHANGED LINE 1 HERE: Added min-h, background image URL, cover, center, and no-repeat */}
+      <div className="relative min-h-600px bg-[url('/hero-banner.webp')] bg-cover bg-center bg-no-repeat overflow-hidden">
+        
+        {/* 🛑 CHANGED LINE 2 HERE: Changed bg-black/20 to bg-black/60 so text is readable over the photo */}
+        <div className="absolute inset-0 bg-black/60" />
 
-        {/* Content */}
-        <div className="relative z-10 flex flex-col items-center justify-center px-4 py-20 md:py-32 text-center">
+        {/* Content (No changes needed here, it already has relative z-10!) */}
+        <div className="relative z-10 flex flex-col items-center justify-center px-4 py-20 md:py-32 text-center min-h-600px">
           <motion.h1
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}

@@ -20,12 +20,11 @@ export default function Footer() {
         <div className="mx-auto grid max-w-7xl gap-8 sm:grid-cols-2 lg:grid-cols-3">
           {/* Brand */}
           <div className="flex flex-col gap-3">
-            <div className="flex items-center gap-2">
-              <UtensilsCrossed className="size-6 text-gold" />
-              <span className="font-royal text-2xl font-bold text-gold-gradient">
-                The Kilo Factory
-              </span>
-            </div>
+                        <img 
+              src="/logo.png" 
+              alt="The Kilo Factory Logo" 
+              className="h-12 w-auto object-contain mr-70"
+            />
             <p className="text-sm leading-relaxed text-ivory/70">
               Royal Awadhi Cuisine
             </p>
