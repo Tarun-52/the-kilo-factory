@@ -7,7 +7,7 @@ import AdminPageClient from "./AdminPageClient";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Admin Panel — Dawat Express",
+  title: "Admin Panel — The Kilo Factory",
   description: "Admin dashboard for managing orders, menu, coupons, and settings.",
 };
 

@@ -25,7 +25,7 @@ export default function HeroSection() {
             transition={{ duration: 0.8, ease: 'easeOut' }}
             className="font-royal text-5xl md:text-7xl font-bold text-gold-gradient leading-tight"
           >
-            Dawat Express
+            The Kilo Factory
           </motion.h1>
 
           <motion.p

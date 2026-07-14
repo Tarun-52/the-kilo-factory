@@ -314,7 +314,7 @@ export default function AdminPanel() {
                 <FoodIcon className="size-4 text-amber-100" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-sm font-bold text-gray-900 leading-tight">Dawat Express</h1>
+                <h1 className="text-sm font-bold text-gray-900 leading-tight">The Kilo Factory</h1>
                 <p className="text-[11px] text-gray-400 leading-tight">Admin Dashboard</p>
               </div>
             </div>

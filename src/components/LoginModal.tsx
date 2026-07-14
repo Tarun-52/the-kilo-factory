@@ -104,7 +104,7 @@ export default function LoginModal({ open, onClose }: { open: boolean; onClose: 
       <DialogContent className="sm:max-w-sm">
         <DialogHeader>
           <DialogTitle className="font-royal text-2xl text-center text-bark">
-            Login to Dawat Express
+            Login to The Kilo Factory
           </DialogTitle>
         </DialogHeader>
         <div className="flex flex-col items-center gap-4 py-4">

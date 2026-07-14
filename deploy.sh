@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================
-# Dawat Express — Deployment Script for Hostinger
+# The Kilo Factory — Deployment Script for Hostinger
 # ============================================
 # Usage:
 #   chmod +x deploy.sh
@@ -23,7 +23,7 @@ YELLOW='\033[1;33m'
 NC='\033[0m'
 
 echo "============================================"
-echo "  Dawat Express — Deployment Setup"
+echo "  The Kilo Factory — Deployment Setup"
 echo "============================================"
 echo ""
 
@@ -98,7 +98,7 @@ echo ""
 echo -e "${YELLOW}[6/6] Starting production server...${NC}"
 echo ""
 echo "============================================"
-echo -e "${GREEN}  Dawat Express is ready!${NC}"
+echo -e "${GREEN}  The Kilo Factory is ready!${NC}"
 echo "============================================"
 echo ""
 echo "  Starting server on port 3000..."

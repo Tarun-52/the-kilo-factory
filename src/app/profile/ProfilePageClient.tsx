@@ -973,7 +973,7 @@ export default function ProfilePageClient() {
             </Card>
 
             <div className="text-center pt-2 pb-4">
-              <p className="text-xs text-muted-foreground">Dawat Express v1.0 — Royal Awadhi Cuisine</p>
+              <p className="text-xs text-muted-foreground">The Kilo Factory v1.0 — Royal Awadhi Cuisine</p>
             </div>
           </div>
         )}

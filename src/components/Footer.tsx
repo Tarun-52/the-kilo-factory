@@ -23,7 +23,7 @@ export default function Footer() {
             <div className="flex items-center gap-2">
               <UtensilsCrossed className="size-6 text-gold" />
               <span className="font-royal text-2xl font-bold text-gold-gradient">
-                DAWAT EXPRESS
+                The Kilo Factory
               </span>
             </div>
             <p className="text-sm leading-relaxed text-ivory/70">
@@ -98,7 +98,7 @@ export default function Footer() {
 
         <div className="mx-auto mt-8 max-w-7xl border-t border-ivory/10 pt-4">
           <div className="flex flex-col items-center justify-between gap-2 text-center text-xs text-ivory/50 sm:flex-row sm:text-left">
-            <span>&copy; 2026 Dawat Express. All rights reserved.</span>
+            <span>&copy; 2026 The Kilo Factory. All rights reserved.</span>
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1">
                 <Truck className="size-3" />
