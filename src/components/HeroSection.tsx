@@ -61,7 +61,7 @@ export default function HeroSection() {
         </div>
       </div>
 
-      {/* ── Offers Bar ─────────────────────────────────────────── */}
+      {/* ── Offers Bar ─────────────────────────────────────────── 
       <div className="bg-maroon-dark border-t border-gold/30">
         <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-8 px-4 py-3">
           <div className="flex items-center gap-2 text-sm">
@@ -82,7 +82,7 @@ export default function HeroSection() {
             </span>
           </div>
         </div>
-      </div>
+      </div>*/}
     </section>
   );
 }
