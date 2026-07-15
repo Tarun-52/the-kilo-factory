@@ -7,7 +7,8 @@ import { useAuthSync } from '@/hooks/use-auth-sync';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import HeroSection from '@/components/HeroSection';
-import CategoryStrip from '@/components/CategoryStrip';
+import OffersSlider from '@/components/OffersSlider';
+import CategoryCircles from '@/components/CategoryCircles';
 import MenuSection from '@/components/MenuSection';
 import ItemDetailDrawer from '@/components/ItemDetailDrawer';
 import CartDrawer from '@/components/CartDrawer';
@@ -19,9 +20,13 @@ import { Loader2 } from 'lucide-react';
 
 function HomeContent() {
   const { data: session, status } = useSession();
-  const { view, setMenuData, menuLoaded, setView } = useStore();
+  const { view, setMenuData, menuLoaded, setView, categories, activeCategory, setActiveCategory } = useStore();
+  
   const [loginOpen, setLoginOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
+  
+  // ADDED: State for the dietary filter so products change on click
+  const [activeFilter, setActiveFilter] = useState("All");
 
   // Sync NextAuth → Zustand
   useAuthSync();
@@ -43,19 +48,16 @@ function HomeContent() {
       .catch(console.error);
   }, [menuLoaded, setMenuData]);
 
-  // Handle ?login= and ?view= query params using window.location.search
-  // (avoids useSearchParams() which causes SSR bailout in Next.js 16)
+  // Handle ?login= and ?view= query params
   useEffect(() => {
     if (!mounted) return;
     const params = new URLSearchParams(window.location.search);
 
-    // Auto-open login modal if ?login= is present
     const loginParam = params.get('login');
     if (loginParam && status === 'unauthenticated') {
       setLoginOpen(true);
     }
 
-    // Switch SPA view if ?view= is present
     const viewParam = params.get('view');
     if (viewParam && ['order-history', 'order-tracking', 'checkout'].includes(viewParam)) {
       setView(viewParam as any);
@@ -69,7 +71,6 @@ function HomeContent() {
     return () => window.removeEventListener('open-login', handler);
   }, []);
 
-  // Auth gate for checkout
   const showLoginForCheckout = view === 'checkout' && !session?.user;
 
   return (
@@ -79,8 +80,21 @@ function HomeContent() {
       {view === 'home' && (
         <main className="flex-1">
           <HeroSection />
-          <CategoryStrip />
-          <MenuSection />
+          
+          {/* Promotional Banner Slider */}
+          <OffersSlider /> 
+
+          {/* Filter Chips + Circular Image Categories */}
+          <CategoryCircles 
+            categories={categories || []} 
+            activeCategory={activeCategory} 
+            onSelectCategory={setActiveCategory}
+            activeFilter={activeFilter}
+            onSelectFilter={setActiveFilter}
+          />
+
+          {/* Pass the activeFilter to MenuSection so it actually filters the items */}
+          <MenuSection activeFilter={activeFilter} />
         </main>
       )}
 

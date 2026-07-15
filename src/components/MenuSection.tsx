@@ -111,23 +111,39 @@ function ItemCard({ item, index }: { item: any; index: number }) {
   );
 }
 
-export default function MenuSection() {
+// ADDED: activeFilter prop to accept the filter selection from page.tsx
+export default function MenuSection({ activeFilter }: { activeFilter: string }) {
   const { items, categories, searchQuery, vegOnly, activeCategory } = useStore();
 
   const filtered = useMemo(() => {
     let result = items;
+    
+    // Category Filter
     if (activeCategory !== 'all') {
-      result = result.filter((i: any) => i.category?.name === activeCategory);
+      result = result.filter((i: any) => i.category?.name === activeCategory || i.category?.id === activeCategory);
     }
+    
+    // ADDED: Dietary Filter Logic (Veg, Non-Veg, Best Seller)
+    if (activeFilter === 'Veg') {
+      result = result.filter((i: any) => i.vegFlag === true);
+    } else if (activeFilter === 'Non-Veg') {
+      result = result.filter((i: any) => i.vegFlag === false);
+    } else if (activeFilter === 'Best Seller') {
+      result = result.filter((i: any) => i.isBestseller === true);
+    }
+
+    // Existing VegOnly toggle (if you have it in your store)
     if (vegOnly) {
       result = result.filter((i: any) => i.vegFlag);
     }
+    
+    // Search Filter
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter((i: any) => i.name.toLowerCase().includes(q));
     }
     return result;
-  }, [items, activeCategory, vegOnly, searchQuery]);
+  }, [items, activeCategory, vegOnly, searchQuery, activeFilter]); // ADDED activeFilter to dependency array
 
   const grouped = useMemo(() => {
     const map = new Map<string, any[]>();
