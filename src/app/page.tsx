@@ -19,6 +19,7 @@ import LoginModal from '@/components/LoginModal';
 import BottomNav from '@/components/BottomNav'; // ADDED: Mobile Bottom Nav
 import { Loader2 } from 'lucide-react';
 
+import MobileProfile from '@/components/MobileProfile';
 function HomeContent() {
   const { data: session, status } = useSession();
   const { view, setMenuData, menuLoaded, setView, categories, activeCategory, setActiveCategory } = useStore();
@@ -101,7 +102,9 @@ function HomeContent() {
       )}
 
       {showLoginForCheckout && (
+
         <main className="flex-1 flex items-center justify-center">
+          
           <div className="text-center p-8">
             <p className="font-royal text-xl text-bark mb-4">Please sign in to checkout</p>
             <button
@@ -117,6 +120,14 @@ function HomeContent() {
       {view === 'checkout' && session?.user && <CheckoutView />}
       {view === 'order-confirmation' && <OrderConfirmation />}
       {(view === 'order-tracking' || view === 'order-history') && <OrderTracking />}
+
+      {(view === 'home' || view === 'order-history') && <Footer />}
+            {view === 'checkout' && session?.user && <CheckoutView />}
+      {view === 'order-confirmation' && <OrderConfirmation />}
+      {(view === 'order-tracking' || view === 'order-history') && <OrderTracking />}
+
+      {/* ADDED: Mobile Profile View */}
+      {view === 'profile' && <MobileProfile />}
 
       {(view === 'home' || view === 'order-history') && <Footer />}
 

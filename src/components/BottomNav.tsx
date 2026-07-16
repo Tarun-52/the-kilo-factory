@@ -8,7 +8,6 @@ export default function BottomNav() {
   const { view, setView } = useStore();
   const { data: session } = useSession();
 
-  // Navigation items configuration
   const navItems = [
     { 
       id: 'home', 
@@ -43,13 +42,8 @@ export default function BottomNav() {
       id: 'profile', 
       label: 'Profile', 
       icon: User, 
-      action: () => {
-        if (!session?.user) {
-          window.dispatchEvent(new Event('open-login'));
-        } else {
-          setView('order-history'); // Or wherever your profile/account page is
-        }
-      }
+      // UPDATED: Now opens the mobile profile page
+      action: () => setView('profile') 
     },
   ];
 
@@ -59,7 +53,6 @@ export default function BottomNav() {
         {navItems.map((item) => {
           const Icon = item.icon;
           
-          // Highlight the active tab
           const isActive = 
             (view === item.id) || 
             (view === 'order-history' && item.id === 'orders') || 
