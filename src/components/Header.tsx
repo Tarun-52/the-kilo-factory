@@ -53,7 +53,6 @@ export default function Header() {
   };
 
   return (
-    // CHANGED: Clean white background with a subtle bottom border and shadow
     <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
       {/* ── Top row ─────────────────────────────────────────────────── */}
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
@@ -96,12 +95,12 @@ export default function Header() {
             <Search className="size-5" />
           </motion.button>
 
-          {/* Veg / Non-veg toggle */}
+          {/* Veg / Non-veg toggle (HIDDEN ON MOBILE) */}
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={toggleVegOnly}
-            className="flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100"
+            className="hidden md:flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100"
             aria-label={vegOnly ? "Show all items" : "Show veg-only items"}
             title={vegOnly ? "Veg only active" : "Click for veg only"}
           >
@@ -115,12 +114,12 @@ export default function Header() {
             <span className="hidden sm:inline">{vegOnly ? "Veg" : "All"}</span>
           </motion.button>
 
-          {/* Cart */}
+          {/* Cart (HIDDEN ON MOBILE) */}
           <motion.button
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setCartOpen(!cartOpen)}
-            className="relative rounded-full p-2 text-gray-700 hover:bg-gray-100"
+            className="hidden md:block relative rounded-full p-2 text-gray-700 hover:bg-gray-100"
             aria-label="Open cart"
           >
             <ShoppingBag className="size-5" />
@@ -131,7 +130,7 @@ export default function Header() {
             )}
           </motion.button>
 
-          {/* Login button — only when not logged in */}
+          {/* Login button (HIDDEN ON MOBILE) — only when not logged in */}
           {!isLoggedIn && (
             <motion.button
               whileHover={{ scale: 1.05 }}
@@ -139,20 +138,20 @@ export default function Header() {
               onClick={() => {
                 window.dispatchEvent(new CustomEvent('open-login'));
               }}
-              className="flex items-center gap-1.5 rounded-full bg-gold-gradient px-3 py-1.5 text-sm font-medium text-bark hover:opacity-90 cursor-pointer shadow-sm"
+              className="hidden md:flex items-center gap-1.5 rounded-full bg-gold-gradient px-3 py-1.5 text-sm font-medium text-bark hover:opacity-90 cursor-pointer shadow-sm"
             >
               <UserIcon className="size-4" />
               <span>Login</span>
             </motion.button>
           )}
 
-          {/* User avatar — goes to /profile */}
+          {/* User avatar (HIDDEN ON MOBILE) — goes to /profile */}
           {isLoggedIn && (
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleNav("/profile")}
-              className="hidden rounded-full p-2 text-gray-700 hover:bg-gray-100 sm:block"
+              className="hidden md:block rounded-full p-2 text-gray-700 hover:bg-gray-100"
               aria-label="My profile"
               title={mounted ? `Signed in as ${session.user?.name}` : ''}
             >
@@ -266,6 +265,36 @@ export default function Header() {
                 {session.user?.name ?? "Profile"}
               </button>
             )}
+            
+            {/* ADDED: Veg/Non-Veg toggle inside mobile menu so it's still accessible */}
+            <button
+              onClick={() => {
+                toggleVegOnly();
+              }}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+            >
+              <span
+                className={`inline-block size-4 rounded-full border-2 ${
+                  vegOnly
+                    ? "border-veg-green bg-veg-green"
+                    : "border-nonveg-red bg-nonveg-red"
+                }`}
+              />
+              {vegOnly ? "Veg Only" : "Show All Items"}
+            </button>
+
+            {/* ADDED: Cart inside mobile menu so it's still accessible */}
+            <button
+              onClick={() => {
+                setCartOpen(true);
+                setMobileMenuOpen(false);
+              }}
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
+            >
+              <ShoppingBag className="size-4" />
+              View Cart {cartCount > 0 && `(${cartCount})`}
+            </button>
+
             <button
               onClick={() => {
                 router.push("/?view=order-history");
