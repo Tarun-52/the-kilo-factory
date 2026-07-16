@@ -41,15 +41,10 @@ export default function Header() {
   }, []);
 
   const cartCount = mounted ? getCartCount() : 0;
-  // Only read session-derived flags after mount to avoid hydration mismatch
-  // (SSR always has session=undefined → false, client may have session → true)
   const isAdmin = mounted ? session?.user?.isAdmin === true : false;
   const isLoggedIn = mounted ? !!session?.user : false;
 
-  // Don't show the main header on /admin (it has its own)
   if (pathname === "/admin") return null;
-
-  // On /profile, show a simpler header
   if (pathname === "/profile") return null;
 
   const handleNav = (path: string) => {
@@ -58,11 +53,12 @@ export default function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-maroon-gradient shadow-lg">
+    // CHANGED: Clean white background with a subtle bottom border and shadow
+    <header className="sticky top-0 z-50 bg-white shadow-sm border-b border-gray-100">
       {/* ── Top row ─────────────────────────────────────────────────── */}
       <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
         {/* Logo */}
-                <button
+        <button
           onClick={() => handleNav("/")}
           className="flex items-center focus:outline-none cursor-pointer"
         >
@@ -76,13 +72,13 @@ export default function Header() {
         {/* ── Desktop center: Search ───────────────────────────────── */}
         <div className="mx-4 hidden max-w-md flex-1 md:block">
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ivory/50" />
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
             <Input
               type="text"
               placeholder="Search dishes…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="h-9 border-gold/30 bg-ivory/10 pl-9 pr-3 text-sm text-ivory placeholder:text-ivory/40 focus-visible:border-gold focus-visible:ring-gold/40"
+              className="h-9 border-gray-200 bg-gray-50 pl-9 pr-3 text-sm text-bark placeholder:text-gray-400 focus-visible:border-gold focus-visible:ring-gold/40"
             />
           </div>
         </div>
@@ -94,7 +90,7 @@ export default function Header() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setMobileSearchOpen((v) => !v)}
-            className="rounded-full p-2 text-ivory/80 hover:bg-ivory/10 md:hidden"
+            className="rounded-full p-2 text-gray-700 hover:bg-gray-100 md:hidden"
             aria-label="Toggle search"
           >
             <Search className="size-5" />
@@ -105,7 +101,7 @@ export default function Header() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.9 }}
             onClick={toggleVegOnly}
-            className="flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium text-ivory/80 hover:bg-ivory/10"
+            className="flex items-center gap-1.5 rounded-full px-2 py-1 text-xs font-medium text-gray-700 hover:bg-gray-100"
             aria-label={vegOnly ? "Show all items" : "Show veg-only items"}
             title={vegOnly ? "Veg only active" : "Click for veg only"}
           >
@@ -124,7 +120,7 @@ export default function Header() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setCartOpen(!cartOpen)}
-            className="relative rounded-full p-2 text-ivory/80 hover:bg-ivory/10"
+            className="relative rounded-full p-2 text-gray-700 hover:bg-gray-100"
             aria-label="Open cart"
           >
             <ShoppingBag className="size-5" />
@@ -141,10 +137,9 @@ export default function Header() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => {
-                // Dispatch a custom event that page.tsx listens to
                 window.dispatchEvent(new CustomEvent('open-login'));
               }}
-              className="flex items-center gap-1.5 rounded-full bg-gold-gradient px-3 py-1.5 text-sm font-medium text-bark hover:opacity-90 cursor-pointer"
+              className="flex items-center gap-1.5 rounded-full bg-gold-gradient px-3 py-1.5 text-sm font-medium text-bark hover:opacity-90 cursor-pointer shadow-sm"
             >
               <UserIcon className="size-4" />
               <span>Login</span>
@@ -157,7 +152,7 @@ export default function Header() {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleNav("/profile")}
-              className="hidden rounded-full p-2 text-ivory/80 hover:bg-ivory/10 sm:block"
+              className="hidden rounded-full p-2 text-gray-700 hover:bg-gray-100 sm:block"
               aria-label="My profile"
               title={mounted ? `Signed in as ${session.user?.name}` : ''}
             >
@@ -180,7 +175,7 @@ export default function Header() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => handleNav("/admin")}
-                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-ivory/80 hover:bg-ivory/10 cursor-pointer"
+                className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
               >
                 <Shield className="size-4" />
                 <span>Admin</span>
@@ -190,7 +185,7 @@ export default function Header() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => router.push("/?view=order-history")}
-              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-ivory/80 hover:bg-ivory/10 cursor-pointer"
+              className="flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
             >
               <ClipboardList className="size-4" />
               <span>Orders</span>
@@ -202,7 +197,7 @@ export default function Header() {
             whileHover={{ scale: 1.1 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setMobileMenuOpen((v) => !v)}
-            className="rounded-full p-2 text-ivory/80 hover:bg-ivory/10 md:hidden"
+            className="rounded-full p-2 text-gray-700 hover:bg-gray-100 md:hidden"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? (
@@ -221,17 +216,17 @@ export default function Header() {
           animate={{ height: "auto", opacity: 1 }}
           exit={{ height: 0, opacity: 0 }}
           transition={{ duration: 0.2 }}
-          className="overflow-hidden border-t border-ivory/10 px-4 py-2 md:hidden"
+          className="overflow-hidden border-t border-gray-100 px-4 py-2 md:hidden"
         >
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-ivory/50" />
+            <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400" />
             <Input
               type="text"
               placeholder="Search dishes…"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               autoFocus
-              className="h-9 border-gold/30 bg-ivory/10 pl-9 pr-3 text-sm text-ivory placeholder:text-ivory/40 focus-visible:border-gold focus-visible:ring-gold/40"
+              className="h-9 border-gray-200 bg-gray-50 pl-9 pr-3 text-sm text-bark placeholder:text-gray-400 focus-visible:border-gold focus-visible:ring-gold/40"
             />
           </div>
         </motion.div>
@@ -243,7 +238,7 @@ export default function Header() {
           initial={{ height: 0, opacity: 0 }}
           animate={{ height: "auto", opacity: 1 }}
           transition={{ duration: 0.25 }}
-          className="overflow-hidden border-t border-ivory/10 px-4 py-3 md:hidden"
+          className="overflow-hidden border-t border-gray-100 px-4 py-3 md:hidden"
         >
           <div className="flex flex-col gap-2">
             {!isLoggedIn && (
@@ -252,7 +247,7 @@ export default function Header() {
                   window.dispatchEvent(new CustomEvent('open-login'));
                   setMobileMenuOpen(false);
                 }}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gold hover:bg-ivory/10 cursor-pointer font-medium"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-maroon hover:bg-gray-100 cursor-pointer font-medium"
               >
                 <UserIcon className="size-4" />
                 Login / Sign In
@@ -261,7 +256,7 @@ export default function Header() {
             {isLoggedIn && (
               <button
                 onClick={() => handleNav("/profile")}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-ivory/80 hover:bg-ivory/10 cursor-pointer"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
               >
                 {mounted && session.user?.image ? (
                   <img src={session.user.image!} alt="" className="size-4 rounded-full" />
@@ -276,7 +271,7 @@ export default function Header() {
                 router.push("/?view=order-history");
                 setMobileMenuOpen(false);
               }}
-              className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-ivory/80 hover:bg-ivory/10 cursor-pointer"
+              className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
             >
               <ClipboardList className="size-4" />
               My Orders
@@ -284,7 +279,7 @@ export default function Header() {
             {isAdmin && (
               <button
                 onClick={() => handleNav("/admin")}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-ivory/80 hover:bg-ivory/10 cursor-pointer"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
               >
                 <Shield className="size-4" />
                 Admin Panel
@@ -296,7 +291,7 @@ export default function Header() {
                   signOut({ callbackUrl: "/" });
                   setMobileMenuOpen(false);
                 }}
-                className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-ivory/80 hover:bg-ivory/10 cursor-pointer"
+                className="flex items-center gap-2 rounded-lg px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 cursor-pointer"
               >
                 <X className="size-4" />
                 Sign Out
