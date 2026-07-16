@@ -16,6 +16,7 @@ import CheckoutView from '@/components/CheckoutView';
 import OrderConfirmation from '@/components/OrderConfirmation';
 import OrderTracking from '@/components/OrderTracking';
 import LoginModal from '@/components/LoginModal';
+import BottomNav from '@/components/BottomNav'; // ADDED: Mobile Bottom Nav
 import { Loader2 } from 'lucide-react';
 
 function HomeContent() {
@@ -25,7 +26,7 @@ function HomeContent() {
   const [loginOpen, setLoginOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   
-  // ADDED: State for the dietary filter so products change on click
+  // State for the dietary filter so products change on click
   const [activeFilter, setActiveFilter] = useState("All");
 
   // Sync NextAuth → Zustand
@@ -74,7 +75,8 @@ function HomeContent() {
   const showLoginForCheckout = view === 'checkout' && !session?.user;
 
   return (
-    <div className="min-h-screen flex flex-col bg-ivory">
+    // ADDED pb-16 md:pb-0 so the fixed bottom menu doesn't cover content on mobile
+    <div className="min-h-screen flex flex-col bg-ivory pb-16 md:pb-0">
       <Header />
 
       {view === 'home' && (
@@ -127,6 +129,9 @@ function HomeContent() {
           window.history.replaceState({}, '', '/');
         }}
       />
+
+      {/* ADDED: Mobile Bottom Navigation Bar */}
+      <BottomNav />
     </div>
   );
 }
