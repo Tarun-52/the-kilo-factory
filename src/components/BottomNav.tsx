@@ -8,12 +8,14 @@ export default function BottomNav() {
   const { view, setView } = useStore();
   const { data: session } = useSession();
 
+  // ADDED: 'glow: true' to the orders object
   const navItems = [
     { 
       id: 'home', 
       label: 'Home', 
       icon: Home, 
-      action: () => setView('home') 
+      action: () => setView('home'),
+      glow: false
     },
     { 
       id: 'menu', 
@@ -24,26 +26,29 @@ export default function BottomNav() {
         setTimeout(() => {
           document.getElementById('menu-section')?.scrollIntoView({ behavior: 'smooth' });
         }, 100);
-      }
+      },
+      glow: false
     },
     { 
       id: 'orders', 
       label: 'Orders', 
       icon: ClipboardList, 
-      action: () => setView('order-history') 
+      action: () => setView('order-history'),
+      glow: true // This triggers the animation!
     },
     { 
       id: 'money', 
       label: 'Money', 
       icon: Wallet, 
-      action: () => setView('checkout') 
+      action: () => setView('checkout'),
+      glow: false
     },
     { 
       id: 'profile', 
       label: 'Profile', 
       icon: User, 
-      // UPDATED: Now opens the mobile profile page
-      action: () => setView('profile') 
+      action: () => setView('profile'),
+      glow: false
     },
   ];
 
@@ -65,16 +70,48 @@ export default function BottomNav() {
               onClick={item.action}
               className="flex flex-col items-center justify-center gap-0.5 flex-1 py-1 cursor-pointer transition-colors"
             >
-              <Icon 
-                className={`size-5 transition-colors ${isActive ? 'text-maroon' : 'text-gray-500'}`} 
-              />
-              <span className={`text-[10px] font-medium transition-colors ${isActive ? 'text-maroon' : 'text-gray-500'}`}>
+              {/* Wrapper for Icon + Glow Effect */}
+              <div className="relative flex items-center justify-center">
+                {/* Glowing Ring Animation (Only shows if glow: true) */}
+                {item.glow && (
+                  <span className="absolute inline-flex h-8 w-8 rounded-full bg-gold opacity-40 animate-glow-ping"></span>
+                )}
+                <Icon 
+                  className={`relative size-5 transition-colors ${isActive ? 'text-maroon' : 'text-gray-500'}`} 
+                />
+              </div>
+              
+              <span className={`relative text-[10px] font-medium transition-colors ${isActive ? 'text-maroon' : 'text-gray-500'}`}>
                 {item.label}
               </span>
             </button>
           );
         })}
       </div>
+
+      {/* Custom CSS for the Glowing Animation */}
+      <style jsx>{`
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        @keyframes glow-ping {
+          0% {
+            transform: scale(1);
+            opacity: 0.4;
+          }
+          50% {
+            transform: scale(1.2);
+            opacity: 0.1;
+          }
+          100% {
+            transform: scale(1);
+            opacity: 0.4;
+          }
+        }
+        .animate-glow-ping {
+          animation: glow-ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+      `}</style>
     </nav>
   );
 }
