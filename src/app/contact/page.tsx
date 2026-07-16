@@ -2,14 +2,26 @@
 
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
-import { Phone, Mail, MapPin, Clock } from 'lucide-react';
+import BottomNav from '@/components/BottomNav';
+import { Phone, Mail, MapPin, Clock, ArrowLeft } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export default function ContactPage() {
+  const router = useRouter();
+
   return (
-    <div className="min-h-screen flex flex-col bg-ivory">
+    <div className="min-h-screen flex flex-col bg-ivory pb-16 md:pb-0">
       <Header />
       
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 py-10 md:py-16">
+        {/* Back Button (Visible on Mobile) */}
+        <button 
+          onClick={() => router.back()}
+          className="md:hidden flex items-center gap-2 text-gray-600 mb-6 font-medium hover:text-maroon transition-colors"
+        >
+          <ArrowLeft className="size-4" /> Back
+        </button>
+
         <div className="text-center mb-12">
           <h1 className="font-royal text-4xl md:text-5xl font-bold text-maroon mb-4">Contact Us</h1>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
@@ -27,7 +39,8 @@ export default function ContactPage() {
               <div>
                 <h3 className="font-royal text-lg text-bark font-semibold">Call Us</h3>
                 <p className="text-gray-600 text-sm mt-1">For support & order inquiries</p>
-                <a href="tel:+918000000000" className="text-maroon font-medium hover:underline">+91 80000 00000</a>
+                {/* UPDATED PHONE NUMBER */}
+                <a href="tel:+919044865050" className="text-maroon font-medium hover:underline">+91 90448 65050</a>
               </div>
             </div>
 
@@ -90,6 +103,7 @@ export default function ContactPage() {
       </main>
 
       <Footer />
+      <BottomNav />
     </div>
   );
 }

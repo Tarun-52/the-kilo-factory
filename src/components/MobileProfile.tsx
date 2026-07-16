@@ -2,19 +2,24 @@
 
 import { useAppStore as useStore } from '@/store';
 import { useSession, signOut } from 'next-auth/react';
-import { useRouter } from 'next/navigation'; // ADDED for page routing
+import { useRouter } from 'next/navigation';
 import { MapPin, Info, ShoppingBag, Phone, ChevronRight, User, LogIn } from 'lucide-react';
 
 export default function MobileProfile() {
   const { data: session } = useSession();
   const { setView } = useStore();
-  const router = useRouter(); // ADDED router
+  const router = useRouter();
 
-  // Updated menu items: Removed Loyalty, Media, Unsubscribe. Added routing.
+  // UPDATED: Added WhatsApp redirect for Bulk Order
   const menuItems = [
     { icon: MapPin, label: "Store Locator", action: () => router.push('/store-locator') },
     { icon: Info, label: "About The Kilo Factory", action: () => router.push('/about') },
-    { icon: ShoppingBag, label: "Bulk Order", action: () => router.push('/bulk-order') },
+    { 
+      icon: ShoppingBag, 
+      label: "Bulk Order", 
+      // Opens WhatsApp chat for 9044865050 in a new tab
+      action: () => window.open('https://wa.me/919044865050?text=Hi%20The%20Kilo%20Factory,%20I%20would%20like%20to%20enquire%20about%20a%20bulk%20order.', '_blank') 
+    },
     { icon: Phone, label: "Contact Us", action: () => router.push('/contact') },
   ];
 
@@ -44,7 +49,6 @@ export default function MobileProfile() {
         ) : (
           <button 
             onClick={() => window.dispatchEvent(new Event('open-login'))}
-            // CHANGED: From bg-red-600 to bg-maroon (your theme color)
             className="w-full bg-maroon text-white font-bold py-4 rounded-xl shadow-sm flex items-center justify-center gap-2 hover:bg-maroon/90 transition-colors text-lg"
           >
             <LogIn className="size-5" /> Login / Signup
