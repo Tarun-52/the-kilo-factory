@@ -2,20 +2,20 @@
 
 import { useAppStore as useStore } from '@/store';
 import { useSession, signOut } from 'next-auth/react';
-import { MapPin, Info, Gift, ShoppingBag, Newspaper, Phone, BellOff, ChevronRight, User, LogIn } from 'lucide-react';
+import { useRouter } from 'next/navigation'; // ADDED for page routing
+import { MapPin, Info, ShoppingBag, Phone, ChevronRight, User, LogIn } from 'lucide-react';
 
 export default function MobileProfile() {
   const { data: session } = useSession();
   const { setView } = useStore();
+  const router = useRouter(); // ADDED router
 
+  // Updated menu items: Removed Loyalty, Media, Unsubscribe. Added routing.
   const menuItems = [
-    { icon: MapPin, label: "Store Locator" },
-    { icon: Info, label: "About BBK" },
-    { icon: Gift, label: "Loyalty Program" },
-    { icon: ShoppingBag, label: "Bulk Order" },
-    { icon: Newspaper, label: "Media" },
-    { icon: Phone, label: "Contact Us" },
-    { icon: BellOff, label: "Un-subscribe" },
+    { icon: MapPin, label: "Store Locator", action: () => router.push('/store-locator') },
+    { icon: Info, label: "About The Kilo Factory", action: () => router.push('/about') },
+    { icon: ShoppingBag, label: "Bulk Order", action: () => router.push('/bulk-order') },
+    { icon: Phone, label: "Contact Us", action: () => router.push('/contact') },
   ];
 
   return (
@@ -44,7 +44,8 @@ export default function MobileProfile() {
         ) : (
           <button 
             onClick={() => window.dispatchEvent(new Event('open-login'))}
-            className="w-full bg-red-600 text-white font-bold py-4 rounded-xl shadow-sm flex items-center justify-center gap-2 hover:bg-red-700 transition-colors text-lg"
+            // CHANGED: From bg-red-600 to bg-maroon (your theme color)
+            className="w-full bg-maroon text-white font-bold py-4 rounded-xl shadow-sm flex items-center justify-center gap-2 hover:bg-maroon/90 transition-colors text-lg"
           >
             <LogIn className="size-5" /> Login / Signup
           </button>
@@ -58,6 +59,7 @@ export default function MobileProfile() {
           return (
             <button 
               key={item.label} 
+              onClick={item.action}
               className={`w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors cursor-pointer ${
                 index !== menuItems.length - 1 ? 'border-b border-gray-100' : ''
               }`}
