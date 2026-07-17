@@ -1,88 +1,69 @@
-'use client';
+"use client";
 
-import { motion } from 'framer-motion';
+import { ShoppingBag, Scale, ChefHat, Truck } from 'lucide-react';
 
 export default function HeroSection() {
-  const scrollToMenu = () => {
-    const el = document.getElementById('menu-section');
-    if (el) {
-      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
+  // Features array for the little icons under the text
+  const features = [
+    { icon: Scale, text: "By Weight" },
+    { icon: ChefHat, text: "Freshly Made" },
+    { icon: Truck, text: "Fast Delivery" },
+  ];
 
   return (
-    <section className="relative w-full">
-      {/* ── Main Hero ──────────────────────────────────────────── */}
+    <section className="bg-bark text-ivory overflow-hidden relative">
+      {/* Subtle Gold Glow Background */}
+      <div className="absolute top-1/2 left-1/4 w-96 h-96 bg-gold/10 rounded-full blur-3xl -translate-y-1/2 pointer-events-none"></div>
       
-      {/* 🛑 CHANGED LINE 1 HERE: Added min-h, background image URL, cover, center, and no-repeat */}
-      <div className="relative min-h-600px bg-[url('/hero-banner.webp')] bg-cover bg-center bg-no-repeat overflow-hidden">
+      <div className="max-w-7xl mx-auto px-4 py-12 md:py-20 grid grid-cols-1 md:grid-cols-2 gap-8 items-center relative z-10">
         
-        {/* 🛑 CHANGED LINE 2 HERE: Changed bg-black/20 to bg-black/60 so text is readable over the photo */}
-        <div className="absolute inset-0 bg-black/60" />
+        {/* Left Content */}
+        <div className="space-y-6 text-center md:text-left">
+          <h1 className="font-royal text-4xl md:text-5xl lg:text-6xl font-bold leading-tight text-gold">
+            Authentic Flavours. <br/> 
+            <span className="text-ivory">ROYAL TASTE, BY THE KILO.</span>
+          </h1>
+          
+          <p className="text-lg text-ivory/80 max-w-lg mx-auto md:mx-0 font-medium">
+            Authentic Kebabs, Biryani & Curries — By Weight, Delivered Fresh.
+          </p>
+          
+          {/* Features List */}
+          <div className="flex flex-wrap justify-center md:justify-start gap-x-6 gap-y-3 py-2">
+            {features.map((feat, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm font-medium text-ivory/90">
+                <feat.icon className="size-5 text-gold" />
+                <span>{feat.text}</span>
+              </div>
+            ))}
+          </div>
 
-        {/* Content (No changes needed here, it already has relative z-10!) */}
-        <div className="relative z-10 flex flex-col items-center justify-center px-4 py-20 md:py-32 text-center min-h-600px">
-          <motion.h1
-            initial={{ opacity: 0, y: -30 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: 'easeOut' }}
-            className="font-royal text-5xl md:text-7xl font-bold text-gold-gradient leading-tight"
-          >
-            The Kilo Factory
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.25, ease: 'easeOut' }}
-            className="mt-4 text-lg md:text-xl font-medium text-ivory/90 tracking-wide"
-          >
-            From the Royal Kitchens of Awadh
-          </motion.p>
-
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5, ease: 'easeOut' }}
-            className="mt-3 max-w-lg text-sm md:text-base text-ivory/70 leading-relaxed"
-          >
-            Authentic Kebabs, Biryanis &amp; Curries — by Weight, Delivered Fresh
-          </motion.p>
-
-          <motion.button
-            initial={{ opacity: 0, scale: 0.85 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.6, delay: 0.75, ease: 'easeOut' }}
-            onClick={scrollToMenu}
-            className="mt-8 px-8 py-3 rounded-full bg-gold-gradient text-bark font-semibold text-sm md:text-base tracking-wide shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer"
-          >
-            Order Now
-          </motion.button>
+          {/* CTA Button */}
+          <div className="pt-2">
+            <button 
+              onClick={() => document.getElementById('menu-section')?.scrollIntoView({ behavior: 'smooth' })}
+              className="inline-flex items-center gap-2 bg-gold-gradient text-bark font-bold px-8 py-3.5 rounded-full shadow-lg hover:scale-105 transition-transform cursor-pointer text-lg"
+            >
+              <ShoppingBag className="size-5" />
+              ORDER NOW
+            </button>
+          </div>
         </div>
+
+        {/* Right Image */}
+        <div className="relative flex justify-center md:justify-end">
+          <div className="relative w-full max-w-md md:max-w-lg aspect-square rounded-[2rem] overflow-hidden shadow-2xl border-4 border-gold/20">
+            <img 
+              src="/hero-banner.webp" 
+              alt="The Kilo Factory Authentic Food" 
+              className="w-full h-full object-cover"
+            />
+            {/* Gradient overlay to blend image with dark background */}
+            <div className="absolute inset-0 bg-gradient-to-t from-bark/60 via-transparent to-transparent"></div>
+          </div>
+        </div>
+
       </div>
-
-      {/* ── Offers Bar ─────────────────────────────────────────── 
-      <div className="bg-maroon-dark border-t border-gold/30">
-        <div className="mx-auto max-w-5xl flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-8 px-4 py-3">
-          <div className="flex items-center gap-2 text-sm">
-            <span className="inline-block rounded bg-gold/90 text-bark px-2 py-0.5 font-bold text-xs tracking-wide">
-              DAWAT100
-            </span>
-            <span className="text-ivory/80">
-              for ₹100 off on ₹500+
-            </span>
-          </div>
-          <span className="hidden sm:inline text-gold/40">|</span>
-          <div className="flex items-center gap-2 text-sm">
-            <span className="inline-block rounded bg-gold/90 text-bark px-2 py-0.5 font-bold text-xs tracking-wide">
-              ROYAL20
-            </span>
-            <span className="text-ivory/80">
-              20% off on orders above ₹800
-            </span>
-          </div>
-        </div>
-      </div>*/}
     </section>
   );
 }
