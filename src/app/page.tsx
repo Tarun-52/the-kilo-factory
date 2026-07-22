@@ -16,28 +16,27 @@ import CheckoutView from '@/components/CheckoutView';
 import OrderConfirmation from '@/components/OrderConfirmation';
 import OrderTracking from '@/components/OrderTracking';
 import LoginModal from '@/components/LoginModal';
-import BottomNav from '@/components/BottomNav';
-import MobileProfile from '@/components/MobileProfile';
 import { Loader2 } from 'lucide-react';
 
 function HomeContent() {
   const { data: session, status } = useSession();
-  const { view, setMenuData, menuLoaded, setView, categories, activeCategory, setActiveCategory } = useStore();
-  
+  const { view, setMenuData, menuLoaded, setView, categories, items, activeCategory, setActiveCategory } = useStore();
   const [loginOpen, setLoginOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
-  
-  // State for the dietary filter so products change on click
-  const [activeFilter, setActiveFilter] = useState("All");
 
-  // Sync NextAuth → Zustand
   useAuthSync();
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  useEffect(() => { setMounted(true); }, []);
 
-  // Fetch menu data on mount
+  // SAFE FILTER LOGIC: Uses useStore.setState to bypass exact setter names
+  const handleFilterChange = (filter: string) => {
+    setActiveCategory("all");
+    useStore.setState({
+      vegOnly: filter === "Veg",
+      bestsellerOnly: filter === "Best Seller"
+    });
+  };
+
   useEffect(() => {
     if (menuLoaded) return;
     fetch('/api/menu')
@@ -50,23 +49,17 @@ function HomeContent() {
       .catch(console.error);
   }, [menuLoaded, setMenuData]);
 
-  // Handle ?login= and ?view= query params
   useEffect(() => {
     if (!mounted) return;
     const params = new URLSearchParams(window.location.search);
-
     const loginParam = params.get('login');
-    if (loginParam && status === 'unauthenticated') {
-      setLoginOpen(true);
-    }
-
+    if (loginParam && status === 'unauthenticated') setLoginOpen(true);
     const viewParam = params.get('view');
     if (viewParam && ['order-history', 'order-tracking', 'checkout'].includes(viewParam)) {
       setView(viewParam as any);
     }
   }, [mounted, status, setView]);
 
-  // Listen for open-login events from Header
   useEffect(() => {
     const handler = () => setLoginOpen(true);
     window.addEventListener('open-login', handler);
@@ -76,28 +69,23 @@ function HomeContent() {
   const showLoginForCheckout = view === 'checkout' && !session?.user;
 
   return (
-    // ADDED pb-16 md:pb-0 so the fixed bottom menu doesn't cover content on mobile
-    <div className="min-h-screen flex flex-col bg-ivory pb-16 md:pb-0">
+    <div className="min-h-screen flex flex-col bg-ivory">
       <Header />
 
       {view === 'home' && (
         <main className="flex-1">
           <HeroSection />
-          
-          {/* Promotional Banner Slider */}
-          <OffersSlider /> 
+          <OffersSlider />
 
-          {/* Filter Chips + Circular Image Categories */}
-          <CategoryCircles 
-            categories={categories || []} 
-            activeCategory={activeCategory} 
+          <CategoryCircles
+            categories={categories}
+            items={items}
+            activeCategory={activeCategory}
             onSelectCategory={setActiveCategory}
-            activeFilter={activeFilter}
-            onSelectFilter={setActiveFilter}
+            onFilterChange={handleFilterChange}
           />
 
-          {/* Pass the activeFilter to MenuSection so it actually filters the items */}
-          <MenuSection activeFilter={activeFilter} />
+          <MenuSection />
         </main>
       )}
 
@@ -105,39 +93,20 @@ function HomeContent() {
         <main className="flex-1 flex items-center justify-center">
           <div className="text-center p-8">
             <p className="font-royal text-xl text-bark mb-4">Please sign in to checkout</p>
-            <button
-              onClick={() => setLoginOpen(true)}
-              className="bg-gold-gradient text-bark font-bold px-6 py-2.5 rounded-xl cursor-pointer"
-            >
-              Sign In
-            </button>
+            <button onClick={() => setLoginOpen(true)} className="bg-gold-gradient text-bark font-bold px-6 py-2.5 rounded-xl cursor-pointer">Sign In</button>
           </div>
         </main>
       )}
 
-      {/* Cleaned up duplicate renders below */}
       {view === 'checkout' && session?.user && <CheckoutView />}
       {view === 'order-confirmation' && <OrderConfirmation />}
       {(view === 'order-tracking' || view === 'order-history') && <OrderTracking />}
 
-      {/* ADDED: Mobile Profile View */}
-      {view === 'profile' && <MobileProfile />}
-
-      {/* Footer Logic */}
       {(view === 'home' || view === 'order-history') && <Footer />}
 
       <ItemDetailDrawer />
       <CartDrawer />
-      <LoginModal
-        open={loginOpen}
-        onClose={() => {
-          setLoginOpen(false);
-          window.history.replaceState({}, '', '/');
-        }}
-      />
-
-      {/* ADDED: Mobile Bottom Navigation Bar */}
-      <BottomNav />
+      <LoginModal open={loginOpen} onClose={() => { setLoginOpen(false); window.history.replaceState({}, '', '/'); }} />
     </div>
   );
 }

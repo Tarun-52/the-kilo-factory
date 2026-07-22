@@ -1,108 +1,104 @@
 "use client";
+import { useState } from "react";
 
-interface CategoryCirclesProps {
-  categories: any[];
-  activeCategory: string;
-  onSelectCategory: (id: string) => void;
-  activeFilter: string;
-  onSelectFilter: (filter: string) => void;
+interface Category {
+  id: string;
+  name: string;
+  icon: string;
+  photoUrl?: string | null;
+  description?: string | null;
 }
 
-// ==========================================
-// MAPPED TO DIFFERENT IMAGES FROM YOUR FOLDER
-// ==========================================
-const categoryImages: Record<string, string> = {
-  "hyderabadi biryani": "/images/menu/nawabi-murgh-dum-biryani.jpg", 
-  "lucknowi biryani": "/images/menu/nawabi-murgh-dum-biryani.jpg",     
-  "kolkata biryani": "/images/menu/nawabi-murgh-dum-biryani.jpg",       
-  "everyday biryani combos": "/images/menu/aaloo-ande-ka-salan.jpg", 
-  "kebabs": "/images/menu/mushroom-pepper-salt.jpg",                         
-  "deal of the day": "/images/menu/aaloo-ande-ka-salan.jpg",    
-  "royal kebab collection": "/images/menu/mushroom-pepper-salt.jpg",
-  "veg curries": "/images/menu/mushroom-pepper-salt.jpg",
-  "fish curries": "/images/menu/nawabi-awadhi-fish-curry.jpg",
-  "seafood specialties": "/images/menu/nawabi-awadhi-fish-curry.jpg",
-  "dal specialties": "/images/menu/aaloo-ande-ka-salan.jpg",
-  "egg delicacies": "/images/menu/aaloo-ande-ka-salan.jpg"
-};
-
-// Fallback: Use one of your existing images if a category isn't in the list above
-const FALLBACK_IMG = "/images/menu/mushroom-pepper-salt.jpg";
+interface CategoryCirclesProps {
+  categories: Category[];
+  items: any[]; // ADDED: Pass items to grab their images
+  activeCategory: string;
+  onSelectCategory: (catName: string) => void;
+  onFilterChange: (filter: string) => void;
+}
 
 export default function CategoryCircles({ 
   categories, 
+  items, 
   activeCategory, 
   onSelectCategory,
-  activeFilter,
-  onSelectFilter
+  onFilterChange
 }: CategoryCirclesProps) {
+  const [activeFilter, setActiveFilter] = useState("All");
   const filters = ["All", "Veg", "Non-Veg", "Best Seller"];
 
   return (
-    <section className="bg-ivory pb-6 pt-5 px-4 border-b border-gray-100">
-      <h2 className="font-royal text-xl font-bold text-bark mb-4">Categories</h2>
+    <section className="bg-ivory pb-6 px-4">
+      {/* Title */}
+      <h2 className="font-royal text-2xl font-bold text-bark mb-4">Categories</h2>
 
-      <div className="flex gap-3 mb-6 overflow-x-auto scrollbar-hide">
+      {/* Top Filter Chips */}
+      <div className="flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-hide">
         {filters.map((chip) => (
           <button
             key={chip}
-            onClick={() => onSelectFilter(chip)}
-            className={`px-5 py-1.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all duration-200 border cursor-pointer
-              ${activeFilter === chip
-                ? "bg-bark text-ivory border-bark shadow-sm"
-                : "bg-white text-bark border-gray-300 hover:border-bark/50"
-              }`
-            }
+            onClick={() => {
+              setActiveFilter(chip);
+              onFilterChange(chip);
+            }}
+            className={`px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all border-2 cursor-pointer shadow-sm ${
+              activeFilter === chip
+                ? "bg-bark text-ivory border-bark shadow-md scale-105"
+                : "bg-white text-bark border-gray-200 hover:border-bark/50 hover:shadow-md"
+            }`}
           >
             {chip}
           </button>
         ))}
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-2 scrollbar-hide">
-        {categories.map((cat) => {
-          const isActive = activeCategory === cat.id;
+      {/* Horizontal Slider */}
+      <div className="flex gap-3 md:gap-4 overflow-x-auto pb-4 scrollbar-hide scroll-smooth snap-x snap-mandatory">
+        {categories.map((cat: Category) => {
+          const isActive = activeCategory === cat.name;
           
-          // Lookup image. If not found, use FALLBACK_IMG.
-          const imgSrc = cat.photoUrl || categoryImages[cat.name?.toLowerCase().trim()] || FALLBACK_IMG;
-          
+          // MAGIC TRICK: Find the first item in this category that has an image
+          const fallbackImage = items.find((i: any) => i.categoryId === cat.id && i.photoUrl)?.photoUrl;
+          const displayImage = cat.photoUrl || fallbackImage;
+
           return (
             <button
               key={cat.id}
-              onClick={() => onSelectCategory(cat.id)}
-              className="flex flex-col items-center cursor-pointer group flex-shrink-0"
+              onClick={() => onSelectCategory(cat.name)}
+              className={`flex-shrink-0 w-[130px] md:w-[140px] snap-start group flex flex-col items-center text-center cursor-pointer transition-all duration-300 ${
+                isActive ? "scale-105" : "hover:scale-105"
+              }`}
             >
-              <div className={`relative w-[110px] h-[120px] rounded-xl p-2 flex flex-col items-center justify-center transition-all duration-300 bg-white border-2
-                ${isActive 
-                  ? "border-gold shadow-md scale-105" 
-                  : "border-gray-200 group-hover:border-gold/60 group-hover:shadow-sm"
-                }`}
-              >
-                {/* CIRCLE IMAGE CONTAINER */}
-                <div className="relative w-16 h-16 rounded-full overflow-hidden border border-gray-100 mb-2 bg-gray-50 flex items-center justify-center">
-                  
+              {/* Square Image Container */}
+              <div className={`w-full aspect-square rounded-2xl overflow-hidden mb-2.5 shadow-md border-2 transition-all duration-300 ${
+                isActive 
+                  ? "border-gold shadow-[0_0_15px_rgba(255,215,0,0.5)]" 
+                  : "border-transparent group-hover:border-gold/50 group-hover:shadow-lg"
+              }`}>
+                {displayImage ? (
                   <img 
-                    src={imgSrc} 
+                    src={displayImage} 
                     alt={cat.name} 
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    onError={(e) => {
-                      // If your local image 404s, instantly swap to the fallback image!
-                      e.currentTarget.src = FALLBACK_IMG;
-                      e.currentTarget.onerror = null; 
-                    }}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                   />
-                </div>
-                
-                <span className={`text-[11px] font-medium text-center leading-tight line-clamp-2 w-full
-                  ${isActive ? "text-maroon font-bold" : "text-gray-700 group-hover:text-bark"}`}
-                >
-                  {cat.name}
-                </span>
-
-                {cat.isDeal && (
-                  <div className="absolute -top-2 left-1/2 -translate-x-1/2 bg-red-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded whitespace-nowrap shadow">
-                    DEAL OF THE DAY
+                ) : (
+                  <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 flex items-center justify-center group-hover:scale-110 transition-transform duration-500">
+                    <span className="text-5xl opacity-80">{cat.icon}</span>
                   </div>
+                )}
+              </div>
+              
+              {/* Name & Description */}
+              <div className="w-full px-1">
+                <h3 className={`text-xs font-semibold leading-tight line-clamp-2 transition-colors ${
+                  isActive ? "text-maroon" : "text-bark group-hover:text-maroon"
+                }`}>
+                  {cat.name}
+                </h3>
+                {cat.description && (
+                  <p className="text-[10px] text-gray-400 line-clamp-1 mt-0.5 hidden md:block">
+                    {cat.description}
+                  </p>
                 )}
               </div>
             </button>
