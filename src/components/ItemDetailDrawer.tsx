@@ -104,9 +104,21 @@ export default function ItemDetailDrawer() {
         <SheetTitle className="sr-only">{item.name}</SheetTitle>
         <div className="h-full overflow-y-auto scrollbar-thin">
           {/* Image placeholder */}
-          <div className="relative h-48 sm:h-56 bg-gradient-to-br from-maroon to-maroon-dark flex items-center justify-center">
-            <span className="text-7xl opacity-30">{item.category?.icon || '🍽️'}</span>
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
+                    {/* Image */}
+          <div className="relative h-48 sm:h-56 bg-gradient-to-br from-maroon to-maroon-dark flex items-center justify-center overflow-hidden">
+            {item.photoUrl ? (
+              <img 
+                src={item.photoUrl} 
+                alt={item.name}
+                className="w-full h-full object-contain p-4"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                }}
+              />
+            ) : (
+              <span className="text-7xl opacity-30">{item.category?.icon || '🍽️'}</span>
+            )}
+            <div className="absolute inset-0 bg-linear-to-t from-black/30 to-transparent pointer-events-none" />
             {/* Close button */}
             <button
               onClick={closeItemDetail}
