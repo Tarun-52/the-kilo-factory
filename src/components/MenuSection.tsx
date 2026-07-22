@@ -64,19 +64,19 @@ function ItemCard({ item, index }: { item: any; index: number }) {
       </div>
 
       {/* Image - INCREASED HEIGHT */}
-      <div className={`h-44 md:h-48 bg-gradient-to-br ${grad} flex items-center justify-center relative overflow-hidden`}>
+           {/* Image - Perfect Square, No Cropping */}
+      <div className={`w-full aspect-square bg-gradient-to-br ${grad} flex items-center justify-center relative overflow-hidden`}>
         {item.photoUrl && (
           <img 
             src={item.photoUrl} 
             alt={item.name}
-            className="absolute inset-0 w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500 p-2"
             onError={(e) => {
               (e.target as HTMLImageElement).style.display = 'none';
             }}
           />
         )}
         <span className={`text-6xl opacity-40 ${item.photoUrl ? 'hidden' : ''}`}>{item.category?.icon || '🍽️'}</span>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
       </div>
 
       {/* Info - ADDED DESCRIPTION */}
