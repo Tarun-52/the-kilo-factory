@@ -215,6 +215,21 @@ async function main() {
   await add(22, "Dum Haleem-e-Shahi", "1kg", 1899, "500g", 999, false, true);
   await add(22, "Lucknowi Bheja Masala", "1kg", 2299, "500g", 1299, false);
 
+
+
+    // Create Kitchen User
+  const existingKitchen = await prisma.adminUser.findUnique({ where: { email: "kitchen@thekilofactory.com" } });
+  if (!existingKitchen) {
+    await prisma.adminUser.create({
+      data: {
+        name: "Kitchen Staff",
+        email: "kitchen@thekilofactory.com",
+        password: "kitchen123", // For production, you should hash this later
+        role: "kitchen"
+      }
+    });
+  }
+
   console.log(`✅ Seeded ${cats.length} categories and 115 items`);
 }
 

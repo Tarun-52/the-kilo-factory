@@ -40,6 +40,32 @@ export const authOptions = {
       },
     }),
 
+
+
+        // --- Kitchen Staff Login ---
+    CredentialsProvider({
+      id: "kitchen-credentials",
+      name: "Kitchen Login",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        
+        const user = await db.adminUser.findUnique({
+          where: { email: credentials.email }
+        });
+
+        if (!user || user.password !== credentials.password || user.role !== "kitchen") {
+          return null;
+        }
+
+        return { id: user.id, name: user.name, email: user.email, role: user.role };
+      },
+    }),
+
+
     // ── Google OAuth for users ──────────────────────────────────────
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
@@ -68,18 +94,26 @@ export const authOptions = {
       }
       return true;
     },
-    async session({ session, token }: any) {
+        async session({ session, token }: any) {
       if (session?.user) {
         session.user.id = token.sub;
         session.user.isAdmin = token.isAdmin === true;
         session.user.image = token.image ?? null;
+        // Pass role to frontend
+        if (token.role) {
+          session.user.role = token.role;
+        }
       }
       return session;
     },
-    async jwt({ token, user }: any) {
+        async jwt({ token, user, account }: any) {
       if (user) {
         token.isAdmin = user.isAdmin === true;
         token.image = user.image ?? null;
+        // Save role if coming from credentials login
+        if (user.role) {
+          token.role = user.role;
+        }
       }
       return token;
     },
