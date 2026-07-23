@@ -33,23 +33,36 @@ export default function CategoryCircles({
       <h2 className="font-royal text-2xl font-bold text-bark mb-4">Categories</h2>
 
       {/* Top Filter Chips */}
+            {/* Top Filter Chips with specific colors */}
       <div className="flex gap-3 mb-6 overflow-x-auto pb-2 scrollbar-hide">
-        {filters.map((chip) => (
-          <button
-            key={chip}
-            onClick={() => {
-              setActiveFilter(chip);
-              onFilterChange(chip);
-            }}
-            className={`px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all border-2 cursor-pointer shadow-sm ${
-              activeFilter === chip
-                ? "bg-bark text-ivory border-bark shadow-md scale-105"
-                : "bg-white text-bark border-gray-200 hover:border-bark/50 hover:shadow-md"
-            }`}
-          >
-            {chip}
-          </button>
-        ))}
+        {filters.map((chip) => {
+          // Define exact colors for active and inactive states
+          let styles = "";
+          if (activeFilter === chip) {
+            if (chip === "Veg") styles = "bg-green-600 text-white border-green-600 shadow-md scale-105";
+            else if (chip === "Non-Veg") styles = "bg-red-600 text-white border-red-600 shadow-md scale-105";
+            else if (chip === "Best Seller") styles = "bg-rose-700 text-white border-rose-700 shadow-md scale-105";
+            else styles = "bg-bark text-ivory border-bark shadow-md scale-105"; // "All"
+          } else {
+            if (chip === "Veg") styles = "bg-white text-green-700 border-green-300 hover:border-green-600 hover:shadow-md";
+            else if (chip === "Non-Veg") styles = "bg-white text-red-700 border-red-300 hover:border-red-600 hover:shadow-md";
+            else if (chip === "Best Seller") styles = "bg-white text-rose-700 border-rose-300 hover:border-rose-700 hover:shadow-md";
+            else styles = "bg-white text-bark border-gray-200 hover:border-bark/50 hover:shadow-md"; // "All"
+          }
+
+          return (
+            <button
+              key={chip}
+              onClick={() => {
+                setActiveFilter(chip);
+                onFilterChange(chip);
+              }}
+              className={`px-6 py-2.5 rounded-full text-sm font-semibold whitespace-nowrap transition-all border-2 cursor-pointer ${styles}`}
+            >
+              {chip}
+            </button>
+          );
+        })}
       </div>
 
       {/* Horizontal Slider */}
