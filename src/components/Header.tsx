@@ -13,6 +13,7 @@ import {
   X,
   UtensilsCrossed,
   User as UserIcon,
+  LogOut,
 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useAppStore as useStore } from "@/store";
@@ -25,6 +26,7 @@ export default function Header() {
   const [mounted, setMounted] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [mobileSearchOpen, setMobileSearchOpen] = useState(false);
+  const [profileMenuOpen, setProfileMenuOpen] = useState(false);
 
   const {
     searchQuery,
@@ -145,26 +147,46 @@ export default function Header() {
             </motion.button>
           )}
 
-          {/* User avatar (HIDDEN ON MOBILE) — goes to /profile */}
+          {/* Desktop User Dropdown Menu */}
           {isLoggedIn && (
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => handleNav("/profile")}
-              className="hidden md:block rounded-full p-2 text-gray-700 hover:bg-gray-100"
-              aria-label="My profile"
-              title={mounted ? `Signed in as ${session.user?.name}` : ''}
-            >
-              {mounted && session.user?.image ? (
-                <img
-                  src={session.user.image!}
-                  alt=""
-                  className="size-5 rounded-full"
-                />
-              ) : (
-                <UserIcon className="size-5" />
+            <div className="relative hidden md:block">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setProfileMenuOpen(!profileMenuOpen)}
+                className="rounded-full p-2 text-gray-700 hover:bg-gray-100 cursor-pointer"
+                aria-label="My account"
+              >
+                {mounted && session.user?.image ? (
+                  <img src={session.user.image!} alt="" className="size-5 rounded-full" />
+                ) : (
+                  <UserIcon className="size-5" />
+                )}
+              </motion.button>
+
+              {/* Dropdown Box */}
+              {profileMenuOpen && (
+                <div className="absolute right-0 mt-2 w-48 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-50">
+                  <button
+                    onClick={() => { handleNav("/profile"); setProfileMenuOpen(false); }}
+                    className="w-full text-left px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-50 flex items-center gap-2.5 cursor-pointer"
+                  >
+                    <UserIcon className="size-4 text-gray-500" />
+                    My Profile
+                  </button>
+                  
+                  <div className="my-1 border-t border-gray-100"></div>
+
+                  <button
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2.5 cursor-pointer"
+                  >
+                    <LogOut className="size-4" />
+                    Logout
+                  </button>
+                </div>
               )}
-            </motion.button>
+            </div>
           )}
 
           {/* Desktop nav links */}
@@ -266,7 +288,6 @@ export default function Header() {
               </button>
             )}
             
-            {/* ADDED: Veg/Non-Veg toggle inside mobile menu so it's still accessible */}
             <button
               onClick={() => {
                 toggleVegOnly();
@@ -283,7 +304,6 @@ export default function Header() {
               {vegOnly ? "Veg Only" : "Show All Items"}
             </button>
 
-            {/* ADDED: Cart inside mobile menu so it's still accessible */}
             <button
               onClick={() => {
                 setCartOpen(true);
