@@ -65,7 +65,7 @@ function ItemCard({ item, index }: { item: any; index: number }) {
 
       {/* Image - INCREASED HEIGHT */}
            {/* Image - Perfect Square, No Cropping */}
-      <div className={`w-full aspect-square bg-gradient-to-br ${grad} flex items-center justify-center relative overflow-hidden`}>
+      <div className={`w-full aspect-square bg-linear-to-br ${grad} flex items-center justify-center relative overflow-hidden`}>
         {item.photoUrl && (
           <img 
             src={item.photoUrl} 
@@ -81,7 +81,7 @@ function ItemCard({ item, index }: { item: any; index: number }) {
 
       {/* Info - ADDED DESCRIPTION */}
       <div className="p-4 flex flex-col flex-1">
-        <h3 className="font-royal text-base font-semibold text-bark leading-tight line-clamp-2 min-h-[2.5rem]">
+        <h3 className="font-royal text-base font-semibold text-bark leading-tight line-clamp-2 min-h-10">
           {item.name}
         </h3>
         
@@ -101,15 +101,15 @@ function ItemCard({ item, index }: { item: any; index: number }) {
           </div>
         )}
 
-        <div className="mt-3 flex items-center justify-between">
-          <p className="text-sm font-bold text-maroon">
-            Starts ₹{minPrice}
+                <div className="mt-3 flex items-center justify-between gap-2">
+          <p className="text-xs sm:text-sm font-bold text-maroon truncate">
+            ₹{minPrice}
           </p>
           <button
             onClick={(e) => { e.stopPropagation(); openItemDetail(item); }}
-            className="px-4 py-1.5 rounded-full bg-gold-gradient text-bark text-xs font-bold hover:scale-110 transition-transform shadow-sm"
+            className="shrink-0 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-gold-gradient text-bark text-[11px] sm:text-xs font-bold hover:scale-110 transition-transform shadow-sm flex items-center gap-1"
           >
-            ADD +
+            ADD <span className="text-sm leading-none font-bold">+</span>
           </button>
         </div>
       </div>

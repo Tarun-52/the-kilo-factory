@@ -18,17 +18,29 @@ export default function CartDrawer() {
     cartItems, cartOpen, setCartOpen, couponCode, couponDiscount,
     setCoupon, clearCoupon, deliveryFee, deliveryPincode,
     setDeliveryFee, setDeliveryPincode, removeFromCart, updateQty,
-    getCartSubtotal, getCartCount, goToCheckout,
+    getCartSubtotal, getCartCount, goToCheckout, items, addToCart
   } = useStore();
 
   const [couponInput, setCouponInput] = useState('');
   const [applying, setApplying] = useState(false);
   const [pincodeInput, setPincodeInput] = useState(deliveryPincode || '');
+  const [addMoreOpen, setAddMoreOpen] = useState(false);
 
   const subtotal = getCartSubtotal();
   const gst = Math.round(subtotal * 0.05);
   const packaging = 20;
   const total = Math.max(0, subtotal + gst + packaging + deliveryFee - couponDiscount);
+
+  // Get bestsellers for the "Add More" section
+  const bestsellers = items.filter((i: any) => i.isBestseller).slice(0, 15);
+
+  const handleQuickAdd = (item: any) => {
+    if (item.variants && item.variants.length > 0) {
+      const v = item.variants[0];
+      addToCart(v.id, item.id, item.name, v.unit, v.price, item.vegFlag);
+      toast.success(`Added ${item.name} to cart`);
+    }
+  };
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -71,7 +83,7 @@ export default function CartDrawer() {
   return (
     <Sheet open={cartOpen} onOpenChange={setCartOpen}>
       <SheetContent side="right" className="w-full sm:max-w-md flex flex-col p-0">
-        <SheetHeader className="px-5 pt-5 pb-3 border-b border-gold/20">
+        <SheetHeader className="px-5 pt-5 pb-3 border-b border-gold/20 shrink-0">
           <SheetTitle className="font-royal text-2xl text-bark flex items-center gap-2">
             <ShoppingBag size={22} />
             Your Cart
@@ -82,19 +94,101 @@ export default function CartDrawer() {
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto scrollbar-thin">
-          {cartItems.length === 0 ? (
+          {cartItems.length === 0 && !addMoreOpen ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <ShoppingBag size={48} className="text-gold/40 mb-4" />
               <p className="font-royal text-xl text-bark mb-1">Your cart is empty</p>
               <p className="text-sm text-muted-foreground">Add some delicious items!</p>
+              
+              {/* Show Add More section even if cart is empty */}
+              <div className="w-full mt-8 px-5">
+                 <button 
+                   onClick={() => setAddMoreOpen(!addMoreOpen)} 
+                   className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gold/40 rounded-xl text-sm font-semibold text-maroon hover:bg-gold/10 transition cursor-pointer"
+                 >
+                   <Plus size={16} />
+                   Add Items to Start
+                 </button>
+                 {addMoreOpen && (
+                    <div className="mt-3 flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                       {bestsellers.map((item: any) => (
+                         <div key={item.id} className="shrink-0 w-36 bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm group cursor-pointer hover:shadow-md transition-shadow">
+                           <div className="h-24 bg-gray-50 relative overflow-hidden">
+                             {item.photoUrl ? (
+                               <img src={item.photoUrl} alt={item.name} className="w-full h-full object-contain p-1.5 group-hover:scale-105 transition-transform duration-300" />
+                             ) : (
+                               <div className="w-full h-full flex items-center justify-center text-3xl opacity-50">{item.category?.icon || '🍽️'}</div>
+                             )}
+                             <span className={`absolute top-1 left-1 w-2.5 h-2.5 rounded-sm border ${item.vegFlag ? 'border-veg-green bg-veg-green' : 'border-nonveg-red bg-nonveg-red'}`} />
+                           </div>
+                           <div className="p-2 flex flex-col gap-1.5">
+                             <p className="text-[11px] font-medium text-bark line-clamp-2 leading-tight min-h-8">{item.name}</p>
+                             <div className="flex items-center justify-between">
+                               <span className="text-xs font-bold text-maroon">₹{item.variants[0]?.price}</span>
+                               <button 
+                                 onClick={(e) => { e.stopPropagation(); handleQuickAdd(item); }} 
+                                 className="w-6 h-6 rounded-full bg-gold flex items-center justify-center text-bark hover:scale-110 transition-transform cursor-pointer"
+                               >
+                                 <Plus size={12} />
+                               </button>
+                             </div>
+                           </div>
+                         </div>
+                       ))}
+                     </div>
+                 )}
+              </div>
             </div>
           ) : (
             <div className="px-5 py-3">
-              {/* Items */}
+              
+              {/* --- ADD MORE ITEMS SECTION --- */}
+              {cartItems.length > 0 && (
+                <div className="mb-4">
+                  <button 
+                    onClick={() => setAddMoreOpen(!addMoreOpen)} 
+                    className="w-full flex items-center justify-center gap-2 py-2.5 border-2 border-dashed border-gold/40 rounded-xl text-sm font-semibold text-maroon hover:bg-gold/10 transition cursor-pointer"
+                  >
+                    <Plus size={16} />
+                    {addMoreOpen ? 'Hide Suggestions' : 'Add More Items'}
+                  </button>
+
+                  {addMoreOpen && (
+                    <div className="mt-3 flex gap-3 overflow-x-auto pb-2 scrollbar-hide">
+                      {bestsellers.map((item: any) => (
+                        <div key={item.id} className="shrink-0 w-36 bg-white border border-gray-100 rounded-xl overflow-hidden shadow-sm group cursor-pointer hover:shadow-md transition-shadow">
+                          <div className="h-24 bg-gray-50 relative overflow-hidden">
+                            {item.photoUrl ? (
+                              <img src={item.photoUrl} alt={item.name} className="w-full h-full object-contain p-1.5 group-hover:scale-105 transition-transform duration-300" />
+                            ) : (
+                              <div className="w-full h-full flex items-center justify-center text-3xl opacity-50">{item.category?.icon || '🍽️'}</div>
+                            )}
+                            <span className={`absolute top-1 left-1 w-2.5 h-2.5 rounded-sm border ${item.vegFlag ? 'border-veg-green bg-veg-green' : 'border-nonveg-red bg-nonveg-red'}`} />
+                          </div>
+                          <div className="p-2 flex flex-col gap-1.5">
+                            <p className="text-[11px] font-medium text-bark line-clamp-2 leading-tight min-h-8">{item.name}</p>
+                            <div className="flex items-center justify-between">
+                              <span className="text-xs font-bold text-maroon">₹{item.variants[0]?.price}</span>
+                              <button 
+                                onClick={(e) => { e.stopPropagation(); handleQuickAdd(item); }} 
+                                className="w-6 h-6 rounded-full bg-gold flex items-center justify-center text-bark hover:scale-110 transition-transform cursor-pointer"
+                              >
+                                <Plus size={12} />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* --- ACTUAL CART ITEMS --- */}
               <div className="space-y-3 mb-4">
                 {cartItems.map(ci => (
                   <div key={ci.variantId} className="flex items-center gap-3 p-3 bg-ivory/50 rounded-lg">
-                    <span className={`w-3 h-3 rounded-sm flex-shrink-0 ${ci.vegFlag ? 'bg-veg-green' : 'bg-nonveg-red'}`} />
+                    <span className={`w-3 h-3 rounded-sm shrink-0 ${ci.vegFlag ? 'bg-veg-green' : 'bg-nonveg-red'}`} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-bark truncate">{ci.itemName}</p>
                       <p className="text-xs text-muted-foreground">{ci.unit} · ₹{ci.price}</p>
@@ -178,7 +272,7 @@ export default function CartDrawer() {
         </div>
 
         {cartItems.length > 0 && (
-          <div className="px-5 pb-5 pt-3 border-t border-gold/20">
+          <div className="px-5 pb-5 pt-3 border-t border-gold/20 shrink-0">
             <Button
               onClick={handleCheckout}
               className="w-full bg-maroon-gradient text-ivory font-bold py-3 rounded-xl hover:shadow-lg transition-all text-base"
